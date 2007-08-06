@@ -1,7 +1,7 @@
 /* device.c - Some helper functions for OS devices and BIOS drives */
 /*
  *  GRUB  --  GRand Unified Bootloader
- *  Copyright (C) 1999,2000,2001,2002  Free Software Foundation, Inc.
+ *  Copyright (C) 1999,2000,2001,2002,2003,2004  Free Software Foundation, Inc.
  *
  *  This program is free software; you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -34,6 +34,7 @@
 #include <fcntl.h>
 #include <errno.h>
 #include <limits.h>
+#include <stdarg.h>
 
 #ifdef __linux__
 # if !defined(__GLIBC__) || \
@@ -58,10 +59,12 @@ struct hd_geometry
 #  define FLOPPY_MAJOR	2	/* the major number for floppy */
 # endif /* ! FLOPPY_MAJOR */
 # ifndef MAJOR
-#  ifndef MINORBITS
-#   define MINORBITS	8
-#  endif /* ! MINORBITS */
-#  define MAJOR(dev)	((unsigned int) ((dev) >> MINORBITS))
+#  define MAJOR(dev)	\
+  ({ \
+     unsigned long long __dev = (dev); \
+     (unsigned) ((__dev >> 8) & 0xfff) \
+                 | ((unsigned int) (__dev >> 32) & ~0xfff); \
+  })
 # endif /* ! MAJOR */
 # ifndef CDROM_GET_CAPABILITY
 #  define CDROM_GET_CAPABILITY	0x5331	/* get capabilities */
@@ -71,11 +74,54 @@ struct hd_geometry
 # endif /* ! BLKGETSIZE */
 #endif /* __linux__ */
 
-#if defined(__FreeBSD__) || defined(__NetBSD__) || defined(__OpenBSD__)
+/* Use __FreeBSD_kernel__ instead of __FreeBSD__ for compatibility with
+   kFreeBSD-based non-FreeBSD systems (e.g. GNU/kFreeBSD) */
+#if defined(__FreeBSD__) && ! defined(__FreeBSD_kernel__)
+# define __FreeBSD_kernel__
+#endif
+#ifdef __FreeBSD_kernel__
+  /* Obtain version of kFreeBSD headers */
+# include <osreldate.h>
+# ifndef __FreeBSD_kernel_version
+#  define __FreeBSD_kernel_version __FreeBSD_version
+# endif
+
+  /* Runtime detection of kernel */
+# include <sys/utsname.h>
+int
+get_kfreebsd_version ()
+{
+  struct utsname uts;
+  int major; int minor, v[2];
+
+  uname (&uts);
+  sscanf (uts.release, "%d.%d", &major, &minor);
+
+  if (major >= 9)
+    major = 9;
+  if (major >= 5)
+    {
+      v[0] = minor/10; v[1] = minor%10;
+    }
+  else
+    {
+      v[0] = minor%10; v[1] = minor/10;
+    }
+  return major*100000+v[0]*10000+v[1]*1000;
+}
+#endif /* __FreeBSD_kernel__ */
+
+#if defined(__FreeBSD_kernel__) || defined(__NetBSD__) || defined(__OpenBSD__)
 # include <sys/ioctl.h>		/* ioctl */
 # include <sys/disklabel.h>
 # include <sys/cdio.h>		/* CDIOCCLRDEBUG */
-#endif /* __FreeBSD__ || __NetBSD__ || __OpenBSD__ */
+# if defined(__FreeBSD_kernel__)
+#  include <sys/param.h>
+#  if __FreeBSD_kernel_version >= 500040
+#   include <sys/disk.h>
+#  endif
+# endif /* __FreeBSD_kernel__ */
+#endif /* __FreeBSD_kernel__ || __NetBSD__ || __OpenBSD__ */
 
 #ifdef HAVE_OPENDISK
 # include <util.h>
@@ -91,9 +137,17 @@ get_drive_geometry (struct geometry *geom, char **map, int drive)
 {
   int fd;
 
-  fd = open (map[drive], O_RDONLY);
-  assert (fd >= 0);
+  if (geom->flags == -1)
+    {
+      fd = open (map[drive], O_RDONLY);
+      assert (fd >= 0);
+    }
+  else
+    fd = geom->flags;
 
+  /* XXX This is the default size.  */
+  geom->sector_size = SECTOR_SIZE;
+  
 #if defined(__linux__)
   /* Linux */
   {
@@ -112,12 +166,49 @@ get_drive_geometry (struct geometry *geom, char **map, int drive)
     geom->sectors = hdg.sectors;
     geom->total_sectors = nr;
     
-    close (fd);
-    return;
+    goto success;
   }
 
-#elif defined(__FreeBSD__) || defined(__NetBSD__) || defined(__OpenBSD__)
-  /* FreeBSD, NetBSD or OpenBSD */
+#elif defined(__FreeBSD_kernel__) || defined(__NetBSD__) || defined(__OpenBSD__)
+# if defined(__FreeBSD_kernel__) && __FreeBSD_kernel_version >= 500040
+  /* kFreeBSD version 5 or later */
+  if (get_kfreebsd_version () >= 500040)
+  {
+    unsigned int sector_size;
+    off_t media_size;
+    unsigned int tmp;
+    
+    if(ioctl (fd, DIOCGSECTORSIZE, &sector_size) != 0)
+      sector_size = 512;
+    
+    if (ioctl (fd, DIOCGMEDIASIZE, &media_size) != 0)
+      goto fail;
+
+    geom->total_sectors = media_size / sector_size;
+    
+    if (ioctl (fd, DIOCGFWSECTORS, &tmp) == 0)
+      geom->sectors = tmp;
+    else
+      geom->sectors = 63;
+    if (ioctl (fd, DIOCGFWHEADS, &tmp) == 0)
+      geom->heads = tmp;
+    else if (geom->total_sectors <= 63 * 1 * 1024)
+      geom->heads = 1;
+    else if (geom->total_sectors <= 63 * 16 * 1024)
+      geom->heads = 16;
+    else
+      geom->heads = 255;
+
+    geom->cylinders = (geom->total_sectors
+			   / geom->heads
+			   / geom->sectors);
+    
+    goto success;
+  }
+  else
+#endif /* defined(__FreeBSD_kernel__) && __FreeBSD_kernel_version >= 500040 */
+
+  /* kFreeBSD < 5, NetBSD or OpenBSD */
   {
     struct disklabel hdg;
     if (ioctl (fd, DIOCGDINFO, &hdg))
@@ -128,8 +219,7 @@ get_drive_geometry (struct geometry *geom, char **map, int drive)
     geom->sectors = hdg.d_nsectors;
     geom->total_sectors = hdg.d_secperunit;
 
-    close (fd);
-    return;
+    goto success;
   }
   
 #else
@@ -164,7 +254,9 @@ partially. This is not fatal."
       geom->total_sectors = geom->cylinders * geom->heads * geom->sectors;
   }
 
-  close (fd);
+ success:
+  if (geom->flags == -1)
+    close (fd);
 }
 
 #ifdef __linux__
@@ -198,9 +290,12 @@ get_floppy_disk_name (char *name, int unit)
 #elif defined(__GNU__)
   /* GNU/Hurd */
   sprintf (name, "/dev/fd%d", unit);
-#elif defined(__FreeBSD__)
-  /* FreeBSD */
-  sprintf (name, "/dev/rfd%d", unit);
+#elif defined(__FreeBSD_kernel__)
+  /* kFreeBSD */
+  if (get_kfreebsd_version () >= 400000)
+    sprintf (name, "/dev/fd%d", unit);
+  else
+    sprintf (name, "/dev/rfd%d", unit);
 #elif defined(__NetBSD__)
   /* NetBSD */
   /* opendisk() doesn't work for floppies.  */
@@ -208,6 +303,9 @@ get_floppy_disk_name (char *name, int unit)
 #elif defined(__OpenBSD__)
   /* OpenBSD */
   sprintf (name, "/dev/rfd%dc", unit);
+#elif defined(__QNXNTO__)
+  /* QNX RTP */
+  sprintf (name, "/dev/fd%d", unit);
 #else
 # warning "BIOS floppy drives cannot be guessed in your operating system."
   /* Set NAME to a bogus string.  */
@@ -224,13 +322,12 @@ get_ide_disk_name (char *name, int unit)
 #elif defined(__GNU__)
   /* GNU/Hurd */
   sprintf (name, "/dev/hd%d", unit);
-#elif defined(__FreeBSD__)
-  /* FreeBSD */
-# if __FreeBSD__ >= 4
-  sprintf (name, "/dev/rad%d", unit);
-# else /* __FreeBSD__ <= 3 */
-  sprintf (name, "/dev/rwd%d", unit);
-# endif /* __FreeBSD__ <= 3 */
+#elif defined(__FreeBSD_kernel__)
+  /* kFreeBSD */
+  if (get_kfreebsd_version () >= 400000)
+    sprintf (name, "/dev/ad%d", unit);
+  else
+    sprintf (name, "/dev/rwd%d", unit);
 #elif defined(__NetBSD__) && defined(HAVE_OPENDISK)
   /* NetBSD */
   char shortname[16];
@@ -245,6 +342,11 @@ get_ide_disk_name (char *name, int unit)
 #elif defined(__OpenBSD__)
   /* OpenBSD */
   sprintf (name, "/dev/rwd%dc", unit);
+#elif defined(__QNXNTO__)
+  /* QNX RTP */
+  /* Actually, QNX RTP doesn't distinguish IDE from SCSI, so this could
+     contain SCSI disks.  */
+  sprintf (name, "/dev/hd%d", unit);
 #else
 # warning "BIOS IDE drives cannot be guessed in your operating system."
   /* Set NAME to a bogus string.  */
@@ -261,9 +363,12 @@ get_scsi_disk_name (char *name, int unit)
 #elif defined(__GNU__)
   /* GNU/Hurd */
   sprintf (name, "/dev/sd%d", unit);
-#elif defined(__FreeBSD__)
-  /* FreeBSD */
-  sprintf (name, "/dev/rda%d", unit);
+#elif defined(__FreeBSD_kernel__)
+  /* kFreeBSD */
+  if (get_kfreebsd_version () >= 400000)
+    sprintf (name, "/dev/da%d", unit);
+  else
+    sprintf (name, "/dev/rda%d", unit);
 #elif defined(__NetBSD__) && defined(HAVE_OPENDISK)
   /* NetBSD */
   char shortname[16];
@@ -278,6 +383,11 @@ get_scsi_disk_name (char *name, int unit)
 #elif defined(__OpenBSD__)
   /* OpenBSD */
   sprintf (name, "/dev/rsd%dc", unit);
+#elif defined(__QNXNTO__)
+  /* QNX RTP */
+  /* QNX RTP doesn't distinguish SCSI from IDE, so it is better to
+     disable the detection of SCSI disks here.  */
+  *name = 0;
 #else
 # warning "BIOS SCSI drives cannot be guessed in your operating system."
   /* Set NAME to a bogus string.  */
@@ -291,6 +401,12 @@ get_dac960_disk_name (char *name, int controller, int drive)
 {
   sprintf (name, "/dev/rd/c%dd%d", controller, drive);
 }
+
+static void
+get_ataraid_disk_name (char *name, int unit)
+{
+  sprintf (name, "/dev/ataraid/d%c", unit + '0');
+}
 #endif
 
 /* Check if DEVICE can be read. If an error occurs, return zero,
@@ -301,6 +417,10 @@ check_device (const char *device)
   char buf[512];
   FILE *fp;
 
+  /* If DEVICE is empty, just return 1.  */
+  if (*device == 0)
+    return 1;
+  
   fp = fopen (device, "r");
   if (! fp)
     {
@@ -351,12 +471,12 @@ check_device (const char *device)
 # endif /* ! CDROM_GET_CAPABILITY */
 #endif /* __linux__ */
 
-#if defined(__FreeBSD__) || defined(__NetBSD__) || defined(__OpenBSD__)
+#if defined(__FreeBSD_kernel__) || defined(__NetBSD__) || defined(__OpenBSD__)
 # ifdef CDIOCCLRDEBUG
   if (ioctl (fileno (fp), CDIOCCLRDEBUG, 0) >= 0)
     return 0;
 # endif /* CDIOCCLRDEBUG */
-#endif /* __FreeBSD__ || __NetBSD__ || __OpenBSD__ */
+#endif /* __FreeBSD_kernel__ || __NetBSD__ || __OpenBSD__ */
   
   /* Attempt to read the first sector.  */
   if (fread (buf, 1, 512, fp) != 512)
@@ -376,6 +496,16 @@ read_device_map (FILE *fp, char **map, const char *map_file)
   static void show_error (int no, const char *msg)
     {
       fprintf (stderr, "%s:%d: error: %s\n", map_file, no, msg);
+    }
+  
+  static void show_warning (int no, const char *msg, ...)
+    {
+      va_list ap;
+      
+      va_start (ap, msg);
+      fprintf (stderr, "%s:%d: warning: ", map_file, no);
+      vfprintf (stderr, msg, ap);
+      va_end (ap);
     }
   
   /* If there is the device map file, use the data in it instead of
@@ -423,10 +553,17 @@ read_device_map (FILE *fp, char **map, const char *map_file)
       
       ptr += 2;
       drive = strtoul (ptr, &ptr, 10);
-      if (drive < 0 || drive > 8)
+      if (drive < 0)
 	{
 	  show_error (line_number, "Bad device number");
 	  return 0;
+	}
+      else if (drive > 127)
+	{
+	  show_warning (line_number,
+			"Ignoring %cd%d due to a BIOS limitation",
+			is_floppy ? 'f' : 'h', drive);
+	  continue;
 	}
       
       if (! is_floppy)
@@ -591,6 +728,27 @@ init_device_map (char ***map, const char *map_file, int floppy_disks)
 	}
     }
   
+#ifdef __linux__
+  /* ATARAID disks.  */
+  for (i = 0; i < 8; i++)
+    {
+      char name[20];
+
+      get_ataraid_disk_name (name, i);
+      if (check_device (name))
+        {
+          (*map)[num_hd + 0x80] = strdup (name);
+          assert ((*map)[num_hd + 0x80]);
+
+          /* If the device map file is opened, write the map.  */
+          if (fp)
+            fprintf (fp, "(hd%d)\t%s\n", num_hd, name);
+
+          num_hd++;
+        }
+    }
+#endif /* __linux__ */
+
   /* The rest is SCSI disks.  */
   for (i = 0; i < 16; i++)
     {
@@ -663,9 +821,20 @@ restore_device_map (char **map)
 }
 
 #ifdef __linux__
-/* Linux-only function, because Linux has a bug that the disk cache for
+/* Linux-only functions, because Linux has a bug that the disk cache for
    a whole disk is not consistent with the one for a partition of the
    disk.  */
+int
+is_disk_device (char **map, int drive)
+{
+  struct stat st;
+  
+  assert (map[drive] != 0);
+  assert (stat (map[drive], &st) == 0);
+  /* For now, disk devices under Linux are all block devices.  */
+  return S_ISBLK (st.st_mode);
+}
+
 int
 write_to_partition (char **map, int drive, int partition,
 		    int sector, int size, const char *buf)

@@ -21,6 +21,17 @@ module /boot/serverboot.gz
 title  GNU/Linux
 root (hd1,0)
 kernel /vmlinuz root=/dev/hdb1
+#initrd /initrd.img
+
+# For booting GNU/kFreeBSD
+title  GNU/kFreeBSD
+root   (hd0,2,a)
+kernel /boot/loader.gz
+
+# For booting GNU/kNetBSD
+title  GNU/kNetBSD
+root   (hd0,2,a)
+kernel --type=netbsd /boot/knetbsd.gz
 
 # For booting Mach (getting kernel from floppy)
 title  Utah Mach4 multiboot
@@ -30,9 +41,19 @@ kernel (fd0)/boot/kernel root=hd0s3
 module (fd0)/boot/bootstrap
 
 # For booting FreeBSD
-title  FreeBSD 3.4
+title  FreeBSD
 root   (hd0,2,a)
 kernel /boot/loader
+
+# For booting NetBSD
+title  NetBSD
+root   (hd0,2,a)
+kernel --type=netbsd /netbsd
+
+# For booting OpenBSD
+title  OpenBSD
+root   (hd0,2,a)
+kernel --type=netbsd /bsd
 
 # For booting OS/2
 title OS/2

@@ -1,6 +1,6 @@
 /*
  *  GRUB  --  GRand Unified Bootloader
- *  Copyright (C) 1999, 2000   Free Software Foundation, Inc.
+ *  Copyright (C) 1999,2000,2002,2004   Free Software Foundation, Inc.
  *
  *  This program is free software; you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -51,6 +51,9 @@
 /* The offset of STAGE2_SEGMENT.  */
 #define STAGE1_STAGE2_SEGMENT	0x48
 
+/* The offset of BOOT_DRIVE_MASK.  */
+#define STAGE1_BOOT_DRIVE_MASK	0x4d
+
 /* The offset of a magic number used by Windows NT.  */
 #define STAGE1_WINDOWS_NT_MAGIC	0x1b8
 
@@ -76,5 +79,8 @@
 /* The flag for BIOS drive number to designate a hard disk vs. a
    floppy.  */
 #define STAGE1_BIOS_HD_FLAG	0x80
+
+/* The drive number of an invalid drive.  */
+#define GRUB_INVALID_DRIVE	0xFF
 
 #endif /* ! STAGE1_HEADER */

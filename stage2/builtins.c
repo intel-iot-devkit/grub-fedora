@@ -1,7 +1,7 @@
 /* builtins.c - the GRUB builtin commands */
 /*
  *  GRUB  --  GRand Unified Bootloader
- *  Copyright (C) 1999,2000,2001,2002  Free Software Foundation, Inc.
+ *  Copyright (C) 1999,2000,2001,2002,2003,2004  Free Software Foundation, Inc.
  *
  *  This program is free software; you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -1720,7 +1720,7 @@ install_func (char *arg, int flags)
   /* XXX: Probably SECTOR_SIZE is reasonable.  */
   char *config_filename = stage2_second_buffer + SECTOR_SIZE;
   char *dummy = config_filename + SECTOR_SIZE;
-  int new_drive = 0xFF;
+  int new_drive = GRUB_INVALID_DRIVE;
   int dest_drive, dest_partition, dest_sector;
   int src_drive, src_partition, src_part_start;
   int i;
@@ -1916,6 +1916,12 @@ install_func (char *arg, int flags)
 
   /* Set the "force LBA" flag.  */
   *((unsigned char *) (stage1_buffer + STAGE1_FORCE_LBA)) = is_force_lba;
+
+  /* Set the boot drive mask. This is a workaround for buggy BIOSes which
+     don't pass boot drive correctly. Instead, they pass 0x00 even when
+     booted from 0x80.  */
+  *((unsigned char *) (stage1_buffer + STAGE1_BOOT_DRIVE_MASK))
+    = (dest_drive & BIOS_FLAG_FIXED_DISK);
   
   /* Read the first sector of Stage 2.  */
   disk_read_hook = disk_read_savesect_func;
@@ -2045,7 +2051,7 @@ install_func (char *arg, int flags)
 	      /* If the drive where the Stage 2 resides is the same as
 		 the one where the Stage 1.5 resides, do not embed the
 		 drive number.  */
-	      current_drive = 0xFF;
+	      current_drive = GRUB_INVALID_DRIVE;
 	    }
 
 	  device = (current_drive << 24) | current_partition;
@@ -3741,7 +3747,9 @@ setup_func (char *arg, int flags)
   {
     {"ext2fs",   "/e2fs_stage1_5"},
     {"fat",      "/fat_stage1_5"},
+    {"ufs2",     "/ufs2_stage1_5"},
     {"ffs",      "/ffs_stage1_5"},
+    {"iso9660",  "/iso9660_stage1_5"},
     {"jfs",      "/jfs_stage1_5"},
     {"minix",    "/minix_stage1_5"},
     {"reiserfs", "/reiserfs_stage1_5"},
@@ -4182,7 +4190,7 @@ terminfo_func (char *arg, int flags)
 	      
 	      if (! grub_memcmp (arg, name, len))
 		{
-		  grub_strcpy (options[i].var, arg + len);
+		  grub_strcpy (options[i].var, ti_unescape_string (arg + len));
 		  break;
 		}
 	    }
@@ -4202,18 +4210,23 @@ terminfo_func (char *arg, int flags)
 	  return errnum;
 	}
 
-      ti_set_term (term);
+      ti_set_term (&term);
     }
   else
     {
       /* No option specifies printing out current settings.  */
-      term = ti_get_term ();
+      ti_get_term (&term);
 
-      grub_printf ("name=%s\n", term.name);
-      grub_printf ("cursor_address=%s\n", term.cursor_address);
-      grub_printf ("clear_screen=%s\n", term.clear_screen);
-      grub_printf ("enter_standout_mode=%s\n", term.enter_standout_mode);
-      grub_printf ("exit_standout_mode=%s\n", term.exit_standout_mode);
+      grub_printf ("name=%s\n",
+		   ti_escape_string (term.name));
+      grub_printf ("cursor_address=%s\n",
+		   ti_escape_string (term.cursor_address));
+      grub_printf ("clear_screen=%s\n",
+		   ti_escape_string (term.clear_screen));
+      grub_printf ("enter_standout_mode=%s\n",
+		   ti_escape_string (term.enter_standout_mode));
+      grub_printf ("exit_standout_mode=%s\n",
+		   ti_escape_string (term.exit_standout_mode));
     }
 
   return 0;

@@ -1,7 +1,7 @@
 /* shared.h - definitions used in all GRUB-specific code */
 /*
  *  GRUB  --  GRand Unified Bootloader
- *  Copyright (C) 1999,2000,2001,2002  Free Software Foundation, Inc.
+ *  Copyright (C) 1999,2000,2001,2002,2003,2004  Free Software Foundation, Inc.
  *
  *  This program is free software; you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -73,10 +73,11 @@ extern char *grub_scratch_mem;
 /*
  *  BIOS disk defines
  */
-#define BIOSDISK_READ		    0x0
-#define BIOSDISK_WRITE		    0x1
-#define BIOSDISK_ERROR_GEOMETRY     0x100
-#define BIOSDISK_FLAG_LBA_EXTENSION 0x1
+#define BIOSDISK_READ			0x0
+#define BIOSDISK_WRITE			0x1
+#define BIOSDISK_ERROR_GEOMETRY		0x100
+#define BIOSDISK_FLAG_LBA_EXTENSION	0x1
+#define BIOSDISK_FLAG_CDROM		0x2
 
 /*
  *  This is the filesystem (not raw device) buffer.
@@ -205,6 +206,8 @@ extern char *grub_scratch_mem;
 #define STAGE2_ID_VSTAFS_STAGE1_5	6
 #define STAGE2_ID_JFS_STAGE1_5		7
 #define STAGE2_ID_XFS_STAGE1_5		8
+#define STAGE2_ID_ISO9660_STAGE1_5	9
+#define STAGE2_ID_UFS2_STAGE1_5		10
 
 #ifndef STAGE1_5
 # define STAGE2_ID	STAGE2_ID_STAGE2
@@ -225,6 +228,10 @@ extern char *grub_scratch_mem;
 #  define STAGE2_ID	STAGE2_ID_JFS_STAGE1_5
 # elif defined(FSYS_XFS)
 #  define STAGE2_ID	STAGE2_ID_XFS_STAGE1_5
+# elif defined(FSYS_ISO9660)
+#  define STAGE2_ID	STAGE2_ID_ISO9660_STAGE1_5
+# elif defined(FSYS_UFS2)
+#  define STAGE2_ID	STAGE2_ID_UFS2_STAGE1_5
 # else
 #  error "unknown Stage 2"
 # endif
@@ -281,8 +288,8 @@ extern char *grub_scratch_mem;
 # define KEY_BACKSPACE   0x0008
 # define KEY_HOME        0x4700
 # define KEY_END         0x4F00
-# define KEY_NPAGE       0x4900
-# define KEY_PPAGE       0x5100
+# define KEY_NPAGE       0x5100
+# define KEY_PPAGE       0x4900
 # define A_NORMAL        0x7
 # define A_REVERSE       0x70
 #elif defined(HAVE_NCURSES_CURSES_H)
@@ -403,6 +410,7 @@ struct linux_kernel_header
   unsigned short heap_end_ptr;		/* Free memory after setup end */
   unsigned short pad1;			/* Unused */
   char *cmd_line_ptr;			/* Points to the kernel command line */
+  unsigned long initrd_addr_max;	/* The highest address of initrd */
 } __attribute__ ((packed));
 
 /* Memory map address range descriptor used by GET_MMAP_ENTRY. */
@@ -412,7 +420,7 @@ struct mmar_desc
   unsigned long long addr;	/* Base address. */
   unsigned long long length;	/* Length in bytes. */
   unsigned long type;		/* Type of address range. */
-};
+} __attribute__ ((packed));
 
 /* VBE controller information.  */
 struct vbe_controller
@@ -633,12 +641,14 @@ struct geometry
   unsigned long sectors;
   /* The total number of sectors */
   unsigned long total_sectors;
+  /* Device sector size */
+  unsigned long sector_size;
   /* Flags */
   unsigned long flags;
 };
 
-extern long part_start;
-extern long part_length;
+extern unsigned long part_start;
+extern unsigned long part_length;
 
 extern int current_slice;
 
@@ -657,6 +667,7 @@ extern int filemax;
 extern struct multiboot_info mbi;
 extern unsigned long saved_drive;
 extern unsigned long saved_partition;
+extern unsigned long cdrom_drive;
 #ifndef STAGE1_5
 extern unsigned long saved_mem_upper;
 extern unsigned long extended_memory;

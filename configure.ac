@@ -1,5 +1,5 @@
 dnl Configure script for GRUB.
-dnl Copyright 1999,2000,2001,2002 Free Software Foundation, Inc.
+dnl Copyright 1999,2000,2001,2002,2003,2004 Free Software Foundation, Inc.
 
 dnl Permission to use, copy, modify and distribute this software and its
 dnl documentation is hereby granted, provided that both the copyright
@@ -12,15 +12,17 @@ dnl "AS IS" CONDITION.  THE FREE SOFTWARE FOUNDATION DISCLAIMS ANY
 dnl LIABILITY OF ANY KIND FOR ANY DAMAGES WHATSOEVER RESULTING FROM THE
 dnl USE OF THIS SOFTWARE.
 
-AC_INIT(stage2/stage2.c)
-AM_INIT_AUTOMAKE(grub, 0.93)
-AM_CONFIG_HEADER(config.h)
-AC_PREREQ(2.13)
+AC_PREREQ(2.57)
+AC_INIT([GRUB], [0.95], [bug-grub@gnu.org])
+AC_CONFIG_SRCDIR([stage2/stage2.c])
+AC_CONFIG_HEADER([config.h])
+AM_INIT_AUTOMAKE
 
 AC_CANONICAL_HOST
 
 case "$host_cpu" in
 i[[3456]]86) host_cpu=i386 ;;
+x86_64) host_cpu=x86_64 ;;
 *) AC_MSG_ERROR([unsupported CPU type]) ;;
 esac
 
@@ -44,6 +46,10 @@ if test "x$CFLAGS" = x; then
   default_CFLAGS=yes
 fi
 
+if test "x$host_cpu" = xx86_64; then
+  CFLAGS="-m32 $CFLAGS"
+fi
+
 #
 # Programs
 #
@@ -54,8 +60,8 @@ AC_PROG_CC
 _AM_DEPENDENCIES(CC)
 
 dnl Because recent automake complains about AS, set it here.
-AS="$CC"
-AC_SUBST(AS)
+CCAS="$CC"
+AC_SUBST(CCAS)
 
 AC_ARG_WITH(binutils,
   [  --with-binutils=DIR     search the directory DIR to find binutils])
@@ -72,7 +78,8 @@ fi
 # optimization flags
 if test "x$ac_cv_prog_gcc" = xyes; then
   if test "x$default_CFLAGS" = xyes; then
-    CFLAGS="-g"
+    # Autoconf may set CFLAGS to -O2 and/or -g. So eliminate them.
+    CFLAGS="`echo $CFLAGS | sed -e 's/-g//g' -e 's/-O[[0-9]]//g'` -g"
     # If the user specify the directory for binutils, add the option `-B'.
     if test "x$with_binutils" != x; then
       CFLAGS="-B$with_binutils/ $CFLAGS"
@@ -89,6 +96,21 @@ if test "x$ac_cv_prog_gcc" = xyes; then
       STAGE2_CFLAGS="-Os"
     else
       STAGE2_CFLAGS="-O2 -fno-strength-reduce -fno-unroll-loops"
+    fi
+    # OpenBSD has a GCC extension for protecting applications from
+    # stack smashing attacks, but GRUB doesn't want this feature.
+    AC_CACHE_CHECK([whether gcc has -fno-stack-protector],
+		   no_stack_protector_flag, [
+      saved_CFLAGS=$CFLAGS
+      CFLAGS="-fno-stack-protector"
+      AC_TRY_COMPILE(,
+		     ,
+		     no_stack_protector_flag=yes,
+		     no_stack_protector_flag=no)
+      CFLAGS=$saved_CFLAGS
+    ])
+    if test "x$no_stack_protector_flag" = xyes; then
+      STAGE2_CFLAGS="$STAGE2_CFLAGS -fno-stack-protector"
     fi
   fi
 fi
@@ -186,9 +208,9 @@ AC_CHECK_LIB(util, opendisk, [GRUB_LIBS="$GRUB_LIBS -lutil"
 # Unless the user specify --without-curses, check for curses.
 if test "x$with_curses" != "xno"; then
   AC_CHECK_LIB(ncurses, wgetch, [GRUB_LIBS="$GRUB_LIBS -lncurses"
-  AC_DEFINE(HAVE_LIBCURSES)],
+  AC_DEFINE(HAVE_LIBCURSES, 1, [Define if you have a curses library])],
     [AC_CHECK_LIB(curses, wgetch, [GRUB_LIBS="$GRUB_LIBS -lcurses"
-       AC_DEFINE(HAVE_LIBCURSES)])])
+       AC_DEFINE(HAVE_LIBCURSES, 1, [Define if you have a curses library])])])
 fi
 
 AC_SUBST(GRUB_LIBS)
@@ -218,6 +240,13 @@ AC_ARG_ENABLE(ffs,
 
 if test x"$enable_ffs" != xno; then
   FSYS_CFLAGS="$FSYS_CFLAGS -DFSYS_FFS=1"
+fi
+
+AC_ARG_ENABLE(ufs2,
+  [  --disable-ufs2          disable UFS2 support in Stage 2])
+
+if test x"$enable_ufs2" != xno; then
+  FSYS_CFLAGS="$FSYS_CFLAGS -DFSYS_UFS2=1"
 fi
 
 AC_ARG_ENABLE(minix,
@@ -253,6 +282,13 @@ AC_ARG_ENABLE(xfs,
 
 if test x"$enable_xfs" != xno; then
   FSYS_CFLAGS="$FSYS_CFLAGS -DFSYS_XFS=1"
+fi
+
+AC_ARG_ENABLE(iso9660,
+  [  --disable-iso9660       disable ISO9660 support in Stage 2])
+
+if test x"$enable_iso9660" != xno; then
+  FSYS_CFLAGS="$FSYS_CFLAGS -DFSYS_ISO9660=1"
 fi
 
 dnl AC_ARG_ENABLE(tftp,
@@ -591,7 +627,8 @@ if test "x$enable_preset_menu" = x; then
   :
 else
   if test -r $enable_preset_menu; then
-    grub_DEFINE_FILE(PRESET_MENU_STRING, [$enable_preset_menu])
+    grub_DEFINE_FILE(PRESET_MENU_STRING, [$enable_preset_menu],
+    		     [Define if there is user specified preset menu string])
   else
     AC_MSG_ERROR([Cannot read the preset menu file $enable_preset_menu])
   fi
@@ -610,7 +647,7 @@ AC_ARG_ENABLE(auto-linux-mem-opt,
 if test "x$enable_auto_linux_mem_opt" = xno; then
   :
 else
-  AC_DEFINE(AUTO_LINUX_MEM_OPT)
+  AC_DEFINE(AUTO_LINUX_MEM_OPT, 1, [Define if you don't want to pass the mem= option to Linux])
 fi
 
 dnl Now substitute the variables.
@@ -619,13 +656,15 @@ AC_SUBST(NET_CFLAGS)
 AC_SUBST(NET_EXTRAFLAGS)
 AC_SUBST(NETBOOT_DRIVERS)
 
-dnl Because recent automake complains about ASFLAGS, set it here.
-ASFLAGS='$(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(CPPFLAGS) $(CFLAGS)'
-AC_SUBST(ASFLAGS)
+dnl Because recent automake complains about CCASFLAGS, set it here.
+CCASFLAGS='$(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(CPPFLAGS) $(CFLAGS)'
+AC_SUBST(CCASFLAGS)
 
 
 dnl Output.
-AC_OUTPUT([Makefile stage1/Makefile stage2/Makefile docs/Makefile \
-	lib/Makefile util/Makefile grub/Makefile \
-	netboot/Makefile util/grub-image util/grub-install \
-	util/grub-md5-crypt util/grub-terminfo])
+AC_CONFIG_FILES([Makefile stage1/Makefile stage2/Makefile \
+		 docs/Makefile lib/Makefile util/Makefile \
+		 grub/Makefile netboot/Makefile util/grub-image \
+		 util/grub-install util/grub-md5-crypt \
+		 util/grub-terminfo])
+AC_OUTPUT

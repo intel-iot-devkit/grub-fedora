@@ -77,6 +77,7 @@ struct reiserfs_super_block
 #define REISERFS_MAX_SUPPORTED_VERSION 2
 #define REISERFS_SUPER_MAGIC_STRING "ReIsErFs"
 #define REISER2FS_SUPER_MAGIC_STRING "ReIsEr2Fs"
+#define REISER3FS_SUPER_MAGIC_STRING "ReIsEr3Fs"
 
 #define MAX_HEIGHT 7
 
@@ -112,7 +113,7 @@ struct reiserfs_journal_header {
   /* offset in the log of where to start replay after a crash */
   __u32 j_first_unflushed_offset;
   /* mount id to detect very old transactions */
-  __u32 long j_mount_id;
+  __u32 j_mount_id;
 };
 
 /* magic string to find desc blocks in the journal */
@@ -213,13 +214,11 @@ struct item_head
 
 #define ITEM_VERSION_1 0
 #define ITEM_VERSION_2 1
-#define IH_KEY_OFFSET(ih) (INFO->version < 2 \
-			   || (ih)->ih_version == ITEM_VERSION_1 \
+#define IH_KEY_OFFSET(ih) ((ih)->ih_version == ITEM_VERSION_1 \
 			   ? (ih)->ih_key.u.v1.k_offset \
 			   : (ih)->ih_key.u.v2.k_offset)
 
-#define IH_KEY_ISTYPE(ih, type) (INFO->version < 2 \
-				 || (ih)->ih_version == ITEM_VERSION_1 \
+#define IH_KEY_ISTYPE(ih, type) ((ih)->ih_version == ITEM_VERSION_1 \
 				 ? (ih)->ih_key.u.v1.k_uniqueness == V1_##type \
 				 : (ih)->ih_key.u.v2.k_type == V2_##type)
 
@@ -575,7 +574,8 @@ reiserfs_mount (void)
   if (part_length < superblock + (sizeof (super) >> SECTOR_BITS)
       || ! devread (superblock, 0, sizeof (struct reiserfs_super_block), 
 		(char *) &super)
-      || (substring (REISER2FS_SUPER_MAGIC_STRING, super.s_magic) > 0
+      || (substring (REISER3FS_SUPER_MAGIC_STRING, super.s_magic) > 0
+	  && substring (REISER2FS_SUPER_MAGIC_STRING, super.s_magic) > 0
 	  && substring (REISERFS_SUPER_MAGIC_STRING, super.s_magic) > 0)
       || (/* check that this is not a copy inside the journal log */
 	  super.s_journal_block * super.s_blocksize
@@ -588,7 +588,8 @@ reiserfs_mount (void)
 			(char *) &super))
 	return 0;
 
-      if (substring (REISER2FS_SUPER_MAGIC_STRING, super.s_magic) > 0
+      if (substring (REISER3FS_SUPER_MAGIC_STRING, super.s_magic) > 0
+	  && substring (REISER2FS_SUPER_MAGIC_STRING, super.s_magic) > 0
 	  && substring (REISERFS_SUPER_MAGIC_STRING, super.s_magic) > 0)
 	{
 	  /* pre journaling super block ? */
@@ -612,6 +613,14 @@ reiserfs_mount (void)
   INFO->blocksize_shift = INFO->fullblocksize_shift - SECTOR_BITS;
   INFO->cached_slots = 
     (FSYSREISER_CACHE_SIZE >> INFO->fullblocksize_shift) - 1;
+
+#ifdef REISERDEBUG
+  printf ("reiserfs_mount: version=%d, blocksize=%d\n", 
+	  INFO->version, INFO->blocksize);
+#endif /* REISERDEBUG */
+
+  /* Clear node cache. */
+  memset (INFO->blocks, 0, sizeof (INFO->blocks));
 
   if (super.s_blocksize < FSYSREISER_MIN_BLOCKSIZE
       || super.s_blocksize > FSYSREISER_MAX_BLOCKSIZE
@@ -735,7 +744,8 @@ next_key (void)
     {
       depth = DISK_LEAF_NODE_LEVEL;
       /* The last item, was the last in the leaf node.  
-       * Read in the next block */
+       * Read in the next block 
+       */
       do
 	{
 	  if (depth == INFO->tree_depth)
@@ -758,7 +768,7 @@ next_key (void)
 	cache = CACHE (depth);
       else 
 	{
-	  cache = read_tree_node (INFO->blocks[depth], --depth);
+	  cache = read_tree_node (INFO->blocks[depth], depth);
 	  if (! cache)
 	    return 0;
 	}
@@ -908,6 +918,10 @@ reiserfs_read (char *buf, int len)
       if (IH_KEY_ISTYPE(INFO->current_ih, TYPE_DIRECT)
 	  && offset < blocksize)
 	{
+#ifdef REISERDEBUG
+	  printf ("direct_read: offset=%d, blocksize=%d\n",
+		  offset, blocksize);
+#endif /* REISERDEBUG */
 	  to_read = blocksize - offset;
 	  if (to_read > len)
 	    to_read = len;
@@ -928,6 +942,10 @@ reiserfs_read (char *buf, int len)
       else if (IH_KEY_ISTYPE(INFO->current_ih, TYPE_INDIRECT))
 	{
 	  blocksize = (blocksize >> 2) << INFO->fullblocksize_shift;
+#ifdef REISERDEBUG
+	  printf ("indirect_read: offset=%d, blocksize=%d\n",
+		  offset, blocksize);
+#endif /* REISERDEBUG */
 	  
 	  while (offset < blocksize)
 	    {
@@ -1084,8 +1102,7 @@ reiserfs_dir (char *dirname)
 	  /* If this is a new stat data and size is > 4GB set filemax to 
 	   * maximum
 	   */
-	  if (INFO->version >= 2
-	      && INFO->current_ih->ih_version == ITEM_VERSION_2
+	  if (INFO->current_ih->ih_version == ITEM_VERSION_2
 	      && ((struct stat_data *) INFO->current_item)->sd_size_hi > 0)
 	    filemax = 0xffffffff;
 	  
@@ -1206,7 +1223,8 @@ reiserfs_embed (int *start_sector, int needed_sectors)
   
   *start_sector = 1; /* reserve first sector for stage1 */
   if ((substring (REISERFS_SUPER_MAGIC_STRING, super.s_magic) <= 0
-       || substring (REISER2FS_SUPER_MAGIC_STRING, super.s_magic) <= 0)
+       || substring (REISER2FS_SUPER_MAGIC_STRING, super.s_magic) <= 0
+       || substring (REISER3FS_SUPER_MAGIC_STRING, super.s_magic) <= 0)
       && (/* check that this is not a super block copy inside
 	   * the journal log */
 	  super.s_journal_block * super.s_blocksize 

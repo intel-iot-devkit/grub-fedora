@@ -1,5 +1,5 @@
-This is multiboot.info, produced by makeinfo version 4.1 from
-multiboot.texi.
+This is multiboot.info, produced by makeinfo version 4.6 from
+/home/yo/work/grub/docs/multiboot.texi.
 
 INFO-DIR-SECTION Kernel
 START-INFO-DIR-ENTRY
@@ -29,8 +29,8 @@ File: multiboot.info,  Node: Top,  Next: Overview,  Up: (dir)
 Multiboot Specification
 ***********************
 
-   This file documents Multiboot Specification, the proposal for the
-boot sequence standard. This edition documents version 0.6.93.
+This file documents Multiboot Specification, the proposal for the boot
+sequence standard. This edition documents version 0.6.93.
 
 * Menu:
 
@@ -47,7 +47,7 @@ File: multiboot.info,  Node: Overview,  Next: Terminology,  Prev: Top,  Up: Top
 Introduction to Multiboot Specification
 ***************************************
 
-   This chapter describes some rough information on the Multiboot
+This chapter describes some rough information on the Multiboot
 Specification. Note that this is not a part of the specification itself.
 
 * Menu:
@@ -66,15 +66,15 @@ File: multiboot.info,  Node: Motivation,  Next: Architecture,  Up: Overview
 The background of Multiboot Specification
 =========================================
 
-   Every operating system ever created tends to have its own boot
-loader.  Installing a new operating system on a machine generally
-involves installing a whole new set of boot mechanisms, each with
-completely different install-time and boot-time user interfaces.
-Getting multiple operating systems to coexist reliably on one machine
-through typical "chaining" mechanisms can be a nightmare. There is
-little or no choice of boot loaders for a particular operating system
--- if the one that comes with the operating system doesn't do exactly
-what you want, or doesn't work on your machine, you're screwed.
+Every operating system ever created tends to have its own boot loader.
+Installing a new operating system on a machine generally involves
+installing a whole new set of boot mechanisms, each with completely
+different install-time and boot-time user interfaces. Getting multiple
+operating systems to coexist reliably on one machine through typical
+"chaining" mechanisms can be a nightmare. There is little or no choice
+of boot loaders for a particular operating system -- if the one that
+comes with the operating system doesn't do exactly what you want, or
+doesn't work on your machine, you're screwed.
 
    While we may not be able to fix this problem in existing commercial
 operating systems, it shouldn't be too difficult for a few people in the
@@ -92,8 +92,8 @@ File: multiboot.info,  Node: Architecture,  Next: Operating systems,  Prev: Moti
 The target architecture
 =======================
 
-   This specification is primarily targeted at PC, since they are the
-most common and have the largest variety of operating systems and boot
+This specification is primarily targeted at PC, since they are the most
+common and have the largest variety of operating systems and boot
 loaders. However, to the extent that certain other architectures may
 need a boot specification and do not have one already, a variation of
 this specification, stripped of the x86-specific details, could be
@@ -105,7 +105,7 @@ File: multiboot.info,  Node: Operating systems,  Next: Boot sources,  Prev: Arch
 The target operating systems
 ============================
 
-   This specification is targeted toward free 32-bit operating systems
+This specification is targeted toward free 32-bit operating systems
 that can be fairly easily modified to support the specification without
 going through lots of bureaucratic rigmarole. The particular free
 operating systems that this specification is being primarily designed
@@ -121,9 +121,9 @@ File: multiboot.info,  Node: Boot sources,  Next: Boot-time configuration,  Prev
 Boot sources
 ============
 
-   It should be possible to write compliant boot loaders that load the
-OS image from a variety of sources, including floppy disk, hard disk,
-and across a network.
+It should be possible to write compliant boot loaders that load the OS
+image from a variety of sources, including floppy disk, hard disk, and
+across a network.
 
    Disk-based boot loaders may use a variety of techniques to find the
 relevant OS image and boot module data on disk, such as by
@@ -144,8 +144,8 @@ File: multiboot.info,  Node: Boot-time configuration,  Next: Convenience to oper
 Configure an operating system at boot-time
 ==========================================
 
-   It is often necessary for one reason or another for the user to be
-able to provide some configuration information to an operating system
+It is often necessary for one reason or another for the user to be able
+to provide some configuration information to an operating system
 dynamically at boot time. While this specification should not dictate
 how this configuration information is obtained by the boot loader, it
 should provide a standard means for the boot loader to pass such
@@ -157,8 +157,8 @@ File: multiboot.info,  Node: Convenience to operating systems,  Next: Boot modul
 How to make OS development easier
 =================================
 
-   OS images should be easy to generate. Ideally, an OS image should
-simply be an ordinary 32-bit executable file in whatever file format the
+OS images should be easy to generate. Ideally, an OS image should simply
+be an ordinary 32-bit executable file in whatever file format the
 operating system normally uses. It should be possible to `nm' or
 disassemble OS images just like normal executables. Specialized tools
 should not be required to create OS images in a _special_ file format.
@@ -196,16 +196,16 @@ File: multiboot.info,  Node: Boot modules,  Prev: Convenience to operating syste
 Boot modules
 ============
 
-   Many modern operating system kernels, such as those of VSTa and
-Mach, do not by themselves contain enough mechanism to get the system
-fully operational: they require the presence of additional software
-modules at boot time in order to access devices, mount file systems,
-etc. While these additional modules could be embedded in the main OS
-image along with the kernel itself, and the resulting image be split
-apart manually by the operating system when it receives control, it is
-often more flexible, more space-efficient, and more convenient to the
-operating system and user if the boot loader can load these additional
-modules independently in the first place.
+Many modern operating system kernels, such as those of VSTa and Mach, do
+not by themselves contain enough mechanism to get the system fully
+operational: they require the presence of additional software modules at
+boot time in order to access devices, mount file systems, etc. While
+these additional modules could be embedded in the main OS image along
+with the kernel itself, and the resulting image be split apart manually
+by the operating system when it receives control, it is often more
+flexible, more space-efficient, and more convenient to the operating
+system and user if the boot loader can load these additional modules
+independently in the first place.
 
    Thus, this specification should provide a standard method for a boot
 loader to indicate to the operating system what auxiliary boot modules
@@ -280,7 +280,7 @@ File: multiboot.info,  Node: Specification,  Next: Examples,  Prev: Terminology,
 The exact definitions of Multiboot Specification
 ************************************************
 
-   There are three main aspects of a boot loader/OS image interface:
+There are three main aspects of a boot loader/OS image interface:
 
   1. The format of an OS image as seen by a boot loader.
 
@@ -302,7 +302,7 @@ File: multiboot.info,  Node: OS image format,  Next: Machine state,  Up: Specifi
 OS image format
 ===============
 
-   An OS image may be an ordinary 32-bit executable file in the standard
+An OS image may be an ordinary 32-bit executable file in the standard
 format for that particular operating system, except that it may be
 linked at a non-default load address to avoid loading on top of the
 PC's I/O region or other reserved areas, and of course it should not
@@ -328,7 +328,7 @@ File: multiboot.info,  Node: Header layout,  Next: Header magic fields,  Up: OS 
 The layout of Multiboot header
 ------------------------------
 
-   The layout of the Multiboot header must be as follows:
+The layout of the Multiboot header must be as follows:
 
 Offset  Type    Field Name     Note
 0       u32     magic          required
@@ -412,8 +412,8 @@ File: multiboot.info,  Node: Header address fields,  Next: Header graphics field
 The address fields of Multiboot header
 --------------------------------------
 
-   All of the address fields enabled by flag bit 16 are physical
-addresses.  The meaning of each is as follows:
+All of the address fields enabled by flag bit 16 are physical addresses.
+The meaning of each is as follows:
 
 `header_addr'
      Contains the address corresponding to the beginning of the
@@ -454,11 +454,11 @@ File: multiboot.info,  Node: Header graphics fields,  Prev: Header address field
 The graphics fields of Multiboot header
 ---------------------------------------
 
-   All of the graphics fields are enabled by flag bit 2. They specify
-the preferred graphics mode. Note that that is only a _recommended_
-mode by the OS image. If the mode exists, the boot loader should set
-it, when the user doesn't specify a mode explicitly. Otherwise, the
-boot loader should fall back to a similar mode, if available.
+All of the graphics fields are enabled by flag bit 2. They specify the
+preferred graphics mode. Note that that is only a _recommended_ mode by
+the OS image. If the mode exists, the boot loader should set it, when
+the user doesn't specify a mode explicitly. Otherwise, the boot loader
+should fall back to a similar mode, if available.
 
    The meaning of each is as follows:
 
@@ -489,7 +489,7 @@ File: multiboot.info,  Node: Machine state,  Next: Boot information format,  Pre
 Machine state
 =============
 
-   When the boot loader invokes the 32-bit operating system, the machine
+When the boot loader invokes the 32-bit operating system, the machine
 must have the following state:
 
 `EAX'
@@ -557,7 +557,7 @@ File: multiboot.info,  Node: Boot information format,  Prev: Machine state,  Up:
 Boot information format
 =======================
 
-   FIXME: Split this chapter like the chapter "OS image format".
+FIXME: Split this chapter like the chapter "OS image format".
 
    Upon entry to the operating system, the `EBX' register contains the
 physical address of a "Multiboot information" data structure, through
@@ -885,7 +885,7 @@ File: multiboot.info,  Node: Examples,  Next: History,  Prev: Specification,  Up
 Examples
 ********
 
-   *Caution:* The following items are not part of the specification
+*Caution:* The following items are not part of the specification
 document, but are included for prospective operating system and boot
 loader writers.
 
@@ -902,7 +902,7 @@ File: multiboot.info,  Node: Notes on PC,  Next: BIOS device mapping techniques,
 Notes on PC
 ===========
 
-   In reference to bit 0 of the `flags' parameter in the Multiboot
+In reference to bit 0 of the `flags' parameter in the Multiboot
 information structure, if the bootloader in question uses older BIOS
 interfaces, or the newest ones are not available (see description about
 bit 6), then a maximum of either 15 or 63 megabytes of memory may be
@@ -934,10 +934,10 @@ File: multiboot.info,  Node: BIOS device mapping techniques,  Next: Example OS c
 BIOS device mapping techniques
 ==============================
 
-   Both of these techniques should be usable from any PC operating
-system, and neither require any special support in the drivers
-themselves. This section will be flushed out into detailed
-explanations, particularly for the I/O restriction technique.
+Both of these techniques should be usable from any PC operating system,
+and neither require any special support in the drivers themselves. This
+section will be flushed out into detailed explanations, particularly for
+the I/O restriction technique.
 
    The general rule is that the data comparison technique is the quick
 and dirty solution. It works most of the time, but doesn't cover all the
@@ -959,9 +959,9 @@ File: multiboot.info,  Node: Data comparison technique,  Next: I/O restriction t
 Data comparison technique
 -------------------------
 
-   Before activating _any_ of the device drivers, gather enough data
-from similar sectors on each of the disks such that each one can be
-uniquely identified.
+Before activating _any_ of the device drivers, gather enough data from
+similar sectors on each of the disks such that each one can be uniquely
+identified.
 
    After activating the device drivers, compare data from the drives
 using the operating system drivers. This should hopefully be sufficient
@@ -983,7 +983,7 @@ File: multiboot.info,  Node: I/O restriction technique,  Prev: Data comparison t
 I/O restriction technique
 -------------------------
 
-   This first step may be unnecessary, but first create copy-on-write
+This first step may be unnecessary, but first create copy-on-write
 mappings for the device drivers writing into PC RAM. Keep the original
 copies for the "clean BIOS virtual machine" to be created later.
 
@@ -1015,7 +1015,7 @@ File: multiboot.info,  Node: Example OS code,  Next: Example boot loader code,  
 Example OS code
 ===============
 
-   In this distribution, the example Multiboot kernel `kernel' is
+In this distribution, the example Multiboot kernel `kernel' is
 included. The kernel just prints out the Multiboot information structure
 on the screen, so you can make use of the kernel to test a
 Multiboot-compliant boot loader and for reference to how to implement a
@@ -1050,7 +1050,7 @@ File: multiboot.info,  Node: multiboot.h,  Next: boot.S,  Up: Example OS code
 multiboot.h
 -----------
 
-   This is the source code in the file `multiboot.h':
+This is the source code in the file `multiboot.h':
 
      /* multiboot.h - the header for Multiboot */
      /* Copyright (C) 1999, 2001  Free Software Foundation, Inc.
@@ -1178,7 +1178,7 @@ File: multiboot.info,  Node: boot.S,  Next: kernel.c,  Prev: multiboot.h,  Up: E
 boot.S
 ------
 
-   In the file `boot.S':
+In the file `boot.S':
 
      /* boot.S - bootstrap the kernel */
      /* Copyright (C) 1999, 2001  Free Software Foundation, Inc.
@@ -1266,7 +1266,7 @@ File: multiboot.info,  Node: kernel.c,  Next: Other Multiboot kernels,  Prev: bo
 kernel.c
 --------
 
-   And, in the file `kernel.c':
+And, in the file `kernel.c':
 
      /* kernel.c - the C part of the kernel */
      /* Copyright (C) 1999  Free Software Foundation, Inc.
@@ -1559,9 +1559,9 @@ File: multiboot.info,  Node: Other Multiboot kernels,  Prev: kernel.c,  Up: Exam
 Other Multiboot kernels
 -----------------------
 
-   Other useful information should be available in Multiboot kernels,
-such as GNU Mach and Fiasco <http://os.inf.tu-dresden.de/fiasco/>. And,
-it is worth mentioning the OSKit
+Other useful information should be available in Multiboot kernels, such
+as GNU Mach and Fiasco <http://os.inf.tu-dresden.de/fiasco/>. And, it
+is worth mentioning the OSKit
 <http://www.cs.utah.edu/projects/flux/oskit/>, which provides a library
 supporting the specification.
 
@@ -1571,7 +1571,7 @@ File: multiboot.info,  Node: Example boot loader code,  Prev: Example OS code,  
 Example boot loader code
 ========================
 
-   The GNU GRUB (*note GRUB: (grub.info)Top.) project is a full
+The GNU GRUB (*note GRUB: (grub.info)Top.) project is a full
 Multiboot-compliant boot loader, supporting all required and optional
 features present in this specification. A public release has not been
 made, but the test release is available from:
@@ -1626,36 +1626,36 @@ Index
 
 
 Tag Table:
-Node: Top968
-Node: Overview1307
-Node: Motivation1774
-Node: Architecture3167
-Node: Operating systems3695
-Node: Boot sources4484
-Node: Boot-time configuration5449
-Node: Convenience to operating systems6052
-Node: Boot modules8278
-Node: Terminology9422
-Node: Specification11797
-Node: OS image format12359
-Node: Header layout13412
-Node: Header magic fields14571
-Node: Header address fields17420
-Node: Header graphics fields19258
-Node: Machine state20635
-Node: Boot information format22890
-Node: Examples38256
-Node: Notes on PC38628
-Node: BIOS device mapping techniques40189
-Node: Data comparison technique41094
-Node: I/O restriction technique41947
-Node: Example OS code43155
-Node: multiboot.h44692
-Node: boot.S48597
-Node: kernel.c51292
-Node: Other Multiboot kernels60259
-Node: Example boot loader code60681
-Node: History61202
-Node: Index62119
+Node: Top992
+Node: Overview1328
+Node: Motivation1792
+Node: Architecture3181
+Node: Operating systems3706
+Node: Boot sources4492
+Node: Boot-time configuration5454
+Node: Convenience to operating systems6054
+Node: Boot modules8277
+Node: Terminology9418
+Node: Specification11793
+Node: OS image format12352
+Node: Header layout13402
+Node: Header magic fields14558
+Node: Header address fields17407
+Node: Header graphics fields19241
+Node: Machine state20615
+Node: Boot information format22867
+Node: Examples38230
+Node: Notes on PC38599
+Node: BIOS device mapping techniques40157
+Node: Data comparison technique41059
+Node: I/O restriction technique41909
+Node: Example OS code43114
+Node: multiboot.h44648
+Node: boot.S48550
+Node: kernel.c51242
+Node: Other Multiboot kernels60206
+Node: Example boot loader code60625
+Node: History61143
+Node: Index62060
 
 End Tag Table

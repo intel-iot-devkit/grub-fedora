@@ -1,6 +1,6 @@
 /*
  *  GRUB  --  GRand Unified Bootloader
- *  Copyright (C) 1999,2000,2001,2002 Free Software Foundation, Inc.
+ *  Copyright (C) 1999,2000,2001,2002,2004 Free Software Foundation, Inc.
  *
  *  This program is free software; you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -211,9 +211,14 @@ ENTRY(hard_stop)
  * jumped to with a known state.
  */
 ENTRY(stop_floppy)
-	movw	$0x3F2, %dx
-	xorb	%al, %al
-	outb	%al, %dx
+	pusha
+	call	EXT_C(prot_to_real)
+	.code16
+	xorb	%dl, %dl
+	int	$0x13
+	DATA32  call EXT_C(real_to_prot)
+	.code32
+	popa
 	ret
 
 /*
@@ -933,9 +938,9 @@ realcseg:
 
 
 /*
- *   int biosdisk_int13_extensions (int ah, int drive, void *dap)
+ *   int biosdisk_int13_extensions (int ax, int drive, void *dap)
  *
- *   Call IBM/MS INT13 Extensions (int 13 %ah=AH) for DRIVE. DAP
+ *   Call IBM/MS INT13 Extensions (int 13 %ax=AX) for DRIVE. DAP
  *   is passed for disk address packet. If an error occurs, return
  *   non-zero, otherwise zero.
  */
@@ -945,6 +950,7 @@ ENTRY(biosdisk_int13_extensions)
 	movl	%esp, %ebp
 
 	pushl	%esi
+	pushl	%ebx
 
 	/* compute the address of disk_address_packet */
 	movl	0x10(%ebp), %eax
@@ -955,13 +961,13 @@ ENTRY(biosdisk_int13_extensions)
 
 	/* drive */
 	movb	0xc(%ebp), %dl
-	/* ah */
-	movb	0x8(%ebp), %dh
+	/* ax */
+	movw	0x8(%ebp), %bx
 	/* enter real mode */
 	call	EXT_C(prot_to_real)
 	
 	.code16
-	movb	%dh, %ah
+	movw	%bx, %ax
 	movw	%cx, %ds
 	int	$0x13		/* do the operation */
 	movb	%ah, %dl	/* save return value */
@@ -974,6 +980,7 @@ ENTRY(biosdisk_int13_extensions)
 
 	movb	%dl, %al	/* return value in %eax */
 
+	popl	%ebx
 	popl	%esi
 	popl	%ebp
 
@@ -1099,52 +1106,6 @@ ENTRY(check_int13_extensions)
 	popl	%ebx
 	popl	%ebp
 
-	ret
-
-
-/*
- *   int get_diskinfo_int13_extensions (int drive, void *drp)
- *
- *   Return the geometry of DRIVE in a drive parameters, DRP. If an error
- *   occurs, then return non-zero, otherwise zero.
- */
-
-ENTRY(get_diskinfo_int13_extensions)
-	pushl	%ebp
-	movl	%esp, %ebp
-
-	pushl	%ebx
-	pushl	%esi
-
-	/* compute the address of drive parameters */
-	movl	0xc(%ebp), %eax
-	movw	%ax, %si
-	xorw	%ax, %ax
-	shrl	$4, %eax
-	movw	%ax, %bx	/* save the segment into %bx */
-	/* drive */
-	movb	0x8(%ebp), %dl
-	/* enter real mode */
-	call	EXT_C(prot_to_real)
-
-	.code16
-	movb	$0x48, %ah
-	movw	%bx, %ds
-	int	$0x13		/* do the operation */
-	movb	%ah, %bl	/* save return value in %bl */
-	/* clear the data segment */
-	xorw	%ax, %ax
-	movw	%ax, %ds
-	/* back to protected mode */
-	DATA32	call	EXT_C(real_to_prot)
-	.code32
-
-	movb	%bl, %al	/* return value in %eax */
-
-	popl	%esi
-	popl	%ebx
-	popl	%ebp
-	
 	ret
 
 
@@ -1660,6 +1621,36 @@ ENTRY(set_vbe_mode)
  */
 
 ENTRY(gateA20)
+	/* first, try a BIOS call */
+	pushl	%ebp
+	movl	8(%esp), %edx
+	
+	call	EXT_C(prot_to_real)
+	
+	.code16
+	movw	$0x2400, %ax
+	testw	%dx, %dx
+	jz	1f
+	incw	%ax
+1:	stc
+	int	$0x15
+	jnc	2f
+
+	/* set non-zero if failed */
+	movb	$1, %ah
+
+	/* save the status */
+2:	movb	%ah, %dl
+
+	DATA32	call	EXT_C(real_to_prot)
+	.code32
+
+	popl	%ebp
+	testb	%dl, %dl
+	jnz	3f
+	ret
+
+3:	/* use keyboard controller */
 	pushl	%eax
 
 	call    gloop1

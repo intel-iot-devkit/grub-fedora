@@ -1,7 +1,7 @@
 /* boot.c - load and bootstrap a kernel */
 /*
  *  GRUB  --  GRand Unified Bootloader
- *  Copyright (C) 1999,2000,2001,2002  Free Software Foundation, Inc.
+ *  Copyright (C) 1999,2000,2001,2002,2003,2004  Free Software Foundation, Inc.
  *
  *  This program is free software; you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -373,9 +373,9 @@ load_image (char *kernel, char *arg, kernel_t suggested_type,
 	      linux_mem_size = 0;
 	  }
       
-	  /* It is possible that DATA_LEN is greater than MULTIBOOT_SEARCH,
-	     so the data may have been read partially.  */
-	  if (data_len <= MULTIBOOT_SEARCH)
+	  /* It is possible that DATA_LEN + SECTOR_SIZE is greater than
+	     MULTIBOOT_SEARCH, so the data may have been read partially.  */
+	  if (data_len + SECTOR_SIZE <= MULTIBOOT_SEARCH)
 	    grub_memmove (linux_data_tmp_addr, buffer,
 			  data_len + SECTOR_SIZE);
 	  else
@@ -407,10 +407,24 @@ load_image (char *kernel, char *arg, kernel_t suggested_type,
 	    while (dest < linux_data_tmp_addr + LINUX_CL_END_OFFSET && *src)
 	      *(dest++) = *(src++);
 	
-	    /* Add a mem option automatically only if the user doesn't
-	       specify it explicitly.  */
+	    /* Old Linux kernels have problems determining the amount of
+	       the available memory.  To work around this problem, we add
+	       the "mem" option to the kernel command line.  This has its
+	       own drawbacks because newer kernels can determine the
+	       memory map more accurately.  Boot protocol 2.03, which
+	       appeared in Linux 2.4.18, provides a pointer to the kernel
+	       version string, so we could check it.  But since kernel
+	       2.4.18 and newer are known to detect memory reliably, boot
+	       protocol 2.03 already implies that the kernel is new
+	       enough.  The "mem" option is added if neither of the
+	       following conditions is met:
+	       1) The "mem" option is already present.
+	       2) The "kernel" command is used with "--no-mem-option".
+	       3) GNU GRUB is configured not to pass the "mem" option.
+	       4) The kernel supports boot protocol 2.03 or newer.  */
 	    if (! grub_strstr (arg, "mem=")
 		&& ! (load_flags & KERNEL_LOAD_NO_MEM_OPTION)
+		&& lh->version < 0x0203		/* kernel version < 2.4.18 */
 		&& dest + 15 < linux_data_tmp_addr + LINUX_CL_END_OFFSET)
 	      {
 		*dest++ = ' ';
@@ -786,6 +800,7 @@ load_initrd (char *initrd)
 {
   int len;
   unsigned long moveto;
+  unsigned long max_addr;
   struct linux_kernel_header *lh
     = (struct linux_kernel_header *) (cur_addr - LINUX_SETUP_MOVE_SIZE);
   
@@ -809,8 +824,10 @@ load_initrd (char *initrd)
     moveto = (mbi.mem_upper + 0x400) << 10;
   
   moveto = (moveto - len) & 0xfffff000;
-  if (moveto + len >= LINUX_INITRD_MAX_ADDRESS)
-    moveto = (LINUX_INITRD_MAX_ADDRESS - len) & 0xfffff000;
+  max_addr = (lh->header == LINUX_MAGIC_SIGNATURE && lh->version >= 0x0203
+	      ? lh->initrd_addr_max : LINUX_INITRD_MAX_ADDRESS);
+  if (moveto + len >= max_addr)
+    moveto = (max_addr - len) & 0xfffff000;
   
   /* XXX: Linux 2.3.xx has a bug in the memory range check, so avoid
      the last page.
