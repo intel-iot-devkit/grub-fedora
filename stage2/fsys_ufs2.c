@@ -51,7 +51,7 @@
  * the rights to redistribute these changes.
  *
  *	from: Mach, Revision 2.2  92/04/04  11:35:49  rpd
- *	$Id: fsys_ufs2.c,v 1.1 2004/05/14 20:16:55 okuji Exp $
+ *	$Id: fsys_ufs2.c,v 1.2 2004/06/19 12:17:52 okuji Exp $
  */
 
 #ifdef FSYS_UFS2
@@ -119,7 +119,7 @@ ufs2_mount (void)
   return retval;
 }
 
-static int64_t
+static grub_int64_t
 block_map (int file_block)
 {
   int bnum, offset, bsize;
@@ -161,15 +161,15 @@ block_map (int file_block)
       mapblock_offset = offset;
     }
   
-  return (((int64_t *) MAPBUF)[((file_block - NDADDR) % NINDIR (SUPERBLOCK))
-			  - mapblock_offset]);
+  return (((grub_int64_t *) MAPBUF)[((file_block - NDADDR) % NINDIR (SUPERBLOCK))
+				    - mapblock_offset]);
 }
 
 int
 ufs2_read (char *buf, int len)
 {
   int logno, off, size, ret = 0;
-  int64_t map;
+  grub_int64_t map;
 
   while (len && !errnum)
     {
@@ -208,7 +208,7 @@ ufs2_dir (char *dirname)
 {
   char *rest, ch;
   int block, off, loc, ino = ROOTINO;
-  int64_t map;
+  grub_int64_t map;
   struct direct *dp;
 
 /* main loop to find destination inode */

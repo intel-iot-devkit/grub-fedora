@@ -24,16 +24,15 @@ libgrub_a_CFLAGS = $(GRUB_CFLAGS) -I$(top_srcdir)/lib \
 	-DGRUB_UTIL=1 -DFSYS_EXT2FS=1 -DFSYS_FAT=1 -DFSYS_FFS=1 \
 	-DFSYS_ISO9660=1 -DFSYS_JFS=1 -DFSYS_MINIX=1 -DFSYS_REISERFS=1 \
 	-DFSYS_UFS2=1 -DFSYS_VSTAFS=1 -DFSYS_XFS=1 \
-	-DUSE_MD5_PASSWORDS=1 -DSUPPORT_SERIAL=1 -DSUPPORT_HERCULES=1 \
-	-fwritable-strings
+	-DUSE_MD5_PASSWORDS=1 -DSUPPORT_SERIAL=1 -DSUPPORT_HERCULES=1
 
 # Stage 2 and Stage 1.5's.
-pkgdatadir = $(datadir)/$(PACKAGE)/$(host_cpu)-$(host_vendor)
+pkglibdir = $(libdir)/$(PACKAGE)/$(host_cpu)-$(host_vendor)
 
 EXTRA_PROGRAMS = nbloader.exec pxeloader.exec diskless.exec
 
 if DISKLESS_SUPPORT
-pkgdata_DATA = stage2 stage2_eltorito e2fs_stage1_5 fat_stage1_5 \
+pkglib_DATA = stage2 stage2_eltorito e2fs_stage1_5 fat_stage1_5 \
 	ffs_stage1_5 iso9660_stage1_5 jfs_stage1_5 minix_stage1_5 \
 	reiserfs_stage1_5 ufs2_stage1_5 vstafs_stage1_5 xfs_stage1_5 \
 	nbgrub pxegrub
@@ -44,7 +43,7 @@ noinst_PROGRAMS = pre_stage2.exec start.exec start_eltorito.exec \
 	reiserfs_stage1_5.exec ufs2_stage1_5.exec vstafs_stage1_5.exec \
 	xfs_stage1_5.exec nbloader.exec pxeloader.exec diskless.exec
 else
-pkgdata_DATA = stage2 stage2_eltorito e2fs_stage1_5 fat_stage1_5 \
+pkglib_DATA = stage2 stage2_eltorito e2fs_stage1_5 fat_stage1_5 \
 	ffs_stage1_5 iso9660_stage1_5 jfs_stage1_5 minix_stage1_5 \
 	reiserfs_stage1_5 ufs2_stage1_5 vstafs_stage1_5 xfs_stage1_5
 noinst_DATA = pre_stage2 start start_eltorito
@@ -106,7 +105,7 @@ else
 BUILT_SOURCES = stage2_size.h
 endif
 
-CLEANFILES = $(pkgdata_DATA) $(noinst_DATA) $(BUILT_SOURCES)
+CLEANFILES = $(pkglib_DATA) $(noinst_DATA) $(BUILT_SOURCES)
 
 stage2_size.h: pre_stage2
 	-rm -f stage2_size.h

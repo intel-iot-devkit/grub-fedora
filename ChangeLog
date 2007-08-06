@@ -1,3 +1,259 @@
+2005-05-08  Yoshinori K. Okuji  <okuji@enbug.org>
+
+	* configure.ac (AC_INIT): Upgraded to 0.97.
+
+	* compile: Copied from Automake 1.9.4.
+	* config.guess: Likewise.
+	* config.sub: Likewise.
+	* depcomp: Likewise.
+	* install-sh: Likewise.
+	* missing: Likewise.
+	* mkinstalldirs: Likewise.
+	* mdate-sh: Likewise.
+	* docs/texinfo.tex: Likewise.
+
+2005-05-08  Yoshinori K. Okuji  <okuji@enbug.org>
+
+	* stage2/fsys_xfs.c (next_dentry): Use arrays of arrays instead of
+	arrays of pointers for USUAL, to avoid read-only strings. Reported
+	by Sven Wegener <swegener@gentoo.org>.
+
+2005-03-28  Yoshinori K. Okuji  <okuji@enbug.org>
+
+	* lib/device.c (get_drive_geometry): Use ST.ST_SIZE instead of
+	ST.ST_BLOCKS to get the total number of sectors, because st_blocks
+	is not the same if it is a sparse file.
+
+2005-03-19  Yoshinori K. Okuji  <okuji@enbug.org>
+
+	* stage2/stage2.c (cmain): Initialize DEFAULT_FILE to an empty
+	string. Reported by NATORI Shin <natori@adm.s.u-tokyo.ac.jp>.
+
+2005-03-15  Yoshinori K. Okuji  <okuji@enbug.org>
+
+	* stage2/fsys_fat.c (fat_mount): Ignore the 3rd bit of a media
+	descriptor, because some BIOSes overwrite this value, according
+	to the storage mode (e.g. USB Floppy or USB HDD).
+
+2005-02-16  Yoshinori K. Okuji  <okuji@enbug.org>
+
+	* grub/asmstub.c (grub_stage2): Remove the attribute `volatile'
+	from doit. I hope this change is safe for all compilers.
+
+2005-02-15  Yoshinori K. Okuji  <okuji@enbug.org>
+
+	* stage2/builtins.c (install_func): If DEST_DRIVE is a hard
+	disk, enable the workaround in Stage 1 by replacing the jmp
+	with double nop's.
+
+	* stage1/stage1.h (STAGE1_BOOT_DRIVE_CHECK): New macro.
+	(STAGE1_BOOT_DRIVE_MASK): Removed.
+
+	* stage1/stage1.S (boot_drive_check): New label. This implements
+	a different workaround for buggy BIOSes which don't pass boot
+	drive correctly. This is effective for BIOSes which pass a value
+	without the seventh bit (0x80).
+	(boot_drive_mask): Removed.
+
+2005-02-03  Yoshinori K. Okuji  <okuji@enbug.org>
+
+	* grub/asmstub.c (console_current_color): Make it global as
+	declared.
+	(grub_stage2): Tweak the declaration and the definition of the
+	nested function doit.
+
+2005-02-02  Yoshinori K. Okuji  <okuji@enbug.org>
+
+	* stage2/smp-imps.h (imps_any_new_apics): Removed.
+	(imps_enabled): Likewise.
+	(imps_lapic_addr): Likewise.
+	(imps_num_cpus): Likewise.
+	(imps_cpu_apic_map): Likewise.
+	(imps_apic_cpu_map): Likewise.
+
+	* stage2/Makefile.am (libgrub_a_CFLAGS): Remove
+	-fwritable-strings. Not required for the grub shell actually.
+
+	* grub/Makefile.am (AM_CFLAGS): Likewise.
+
+2005-02-01  Yoshinori K. Okuji  <okuji@enbug.org>
+
+	* grub/asmstub.c (grub_stage2): Use auto instead of static for
+	nested functions.
+
+	* stage2/char_io.c (memcheck) [GRUB_UTIL]: Likewise.
+
+	* stage2/builtins.c (blocklist_func): Likewise.
+	(color_func): Likewise.
+	(install_func): Likewise.
+	(setkey_func): Likewise.
+
+	* lib/device.c (read_device_map): Likewise.
+
+2005-01-30  Yoshinori K. Okuji  <okuji@enbug.org>
+
+        * configure.ac (AC_INIT): Upgraded to 0.96.
+
+2004-10-11 Jason Thomas <jason@staff.pnc.com.au>
+
+	Patch from Stefanus Du Toit  <sjdutoit@uwaterloo.ca>
+	* docs/kernel.c.texi (cmain): Incremement mod by one, instead of
+	sizeof(module_t), since it's already a pointer of type module_t.
+	* docs/kernel.c (cmain): Do the same.
+
+2004-09-20  Yoshinori K. Okuji  <okuji@enbug.org>
+
+	* docs/internals.texi (Internals): Changed to an appendix.
+
+	* docs/grub.texi (@setchapternewpage): Changed to odd from off.
+	(@contents): Moved to the beginning.
+	(Future): Changed to an appendix.
+
+2004-08-17  Yoshinori K. Okuji  <okuji@enbug.org>
+
+	* stage2/cmdline.c (run_script): Fix a reversed conditional.
+	Reported by Alban Crequy <alban.crequy@apinc.org>.
+
+2004-08-07  Jason Thomas  <jason@staff.pnc.com.au>
+	
+	From Michael Hohnbaum <hohnbaum@us.ibm.com>:
+	* stage2/fsys_ext2fs.c (ext2fs_read): Handle sparse files.
+
+2004-07-24  Yoshinori K. Okuji  <okuji@enbug.org>
+
+	* stage2/stage2.c (cmain): Terminate DEFAULT_FILE with NUL
+	correctly. Reported by Alban Crequy <alban.crequy@apinc.org>.
+
+2004-07-21  Robert Millan  <robertmh@gnu.org>
+
+	Patch from David Weinehall <tao@debian.org>
+	* util/mkbimage: Fix XSI-isms (for supporting POSIX-only shells).
+
+2004-07-20  Robert Millan  <robertmh@gnu.org>
+
+	* util/grub-install.in: Detect GNU/k*BSD systems as well.
+
+2004-07-16  Yoshinori K. Okuji  <okuji@enbug.org>
+
+	* util/grub-install.in (convert): Fix the sed statement for
+	Linux. The expression was ambigious in some cases.
+
+2004-06-29  Robert Millan  <robertmh@gnu.org>
+
+	* util/grub-set-default.in: Fix minor syntax error (non-escaped
+	characters).
+
+2004-06-24  Robert Millan  <robertmh@gnu.org>
+
+	Fixes for FHS compliance. (/usr/share is for arch-independant data)
+	* stage1/Makefile.am: Move stage files to pkglibdir.
+	* stage2/Makefile.am: Likewise.
+	* docs/grub.texi: s,/usr/share,/usr/lib,g.
+	* util/grub-image.in: Look for stage files in pkglibdir.
+	* util/grub-install.in: Likewise.
+
+	* util/grub-install.in: Improve usage message.
+
+2004-06-20  Yoshinori K. Okuji  <okuji@enbug.org>
+
+	This is a big change on saving a default entry. This change
+	makes it possible to set up a quite robust system using GRUB.
+	Now we do not use the second sector of Stage 2 to store an
+	entry number but use the file /boot/grub/default. This file
+	must be generated by grub-set-default, although this file is
+	plain-text.
+	
+	* util/grub-set-default.in: New file.
+	
+	* util/grub-install.in (grub_set_default): New variable.
+	Use /grub instead of /boot/grub on OpenBSD as well as NetBSD.
+	Run grub-set-default to make a default file.
+
+	* util/Makefile.am (sbin_SCRIPTS): Added grub-set-default.
+
+	* stage2/stage2.c (run_menu): Change the fallback handling to
+	support multiple fallback entries.
+	(cmain): Likewise. Also, get a saved entry from a default file
+	if possible, before reading a config file.
+
+	* stage2/shared.h (DEFAULT_FILE_BUF): New macro.
+	(DEFAULT_FILE_BUFLEN): Likewise.
+	(CMDLINE_BUF): Set to DEFAULT_FILE_BUF + DEFAULT_FILE_BUFLEN.
+	(MENU_BUFLEN): Set to 0x8000 + PASSWORD_BUF - MENU_BUF.
+	(fallback_entry): Removed.
+	(fallback_entries): Declared.
+	(fallback_entryno): Likewise.
+	(MAX_FALLBACK_ENTRIES): New macro.
+
+	* stage2/cmdline.c (run_script): Use FALLBACK_ENTRYNO instead of
+	FALLBACK_ENTRY.
+
+	* stage2/builtins.c (fallback_entry): Removed.
+	(fallback_entryno): New variable.
+	(fallback_entries): Likewise.
+	(init_config): Initialize FALLBACK_ENTRYNO and FALLBACK_ENTRIES.
+	(fallback_func): Rewritten completely.
+	(savedefault_func): Likewise.
+
+	* docs/grub.texi (grub-set-default): New direntry.
+	(Installation): Describe grub-set-default for manual
+	installations.
+	(Making your system robust): New section.
+	(Booting once-only): New subsection.
+	(Booting fallback systems): Likewise.
+	(fallback): Describe multiple fallback entries.
+	(savedefault): Describe an optional argument.
+	(Invoking grub-set-default): New chapter.
+	(Future): Replaced with a description about GRUB 2.
+
+	* configure.ac (AC_CONFIG_FILES): Added util/grub-set-default.
+
+2004-06-19  Yoshinori K. Okuji  <okuji@enbug.org>
+
+	* stage2/ufs2.h (int8_t): Renamed to ...
+	(grub_uint8_t): ... this.
+	(int16_t): Renamed to ...
+	(grub_int16_t): ... this.
+	(int32_t): Renamed to ...
+	(grub_int32_t): ... this.
+	(int64_t): Renamed to ...
+	(grub_int64_t): ... this.
+	(uint8_t): Renamed to ...
+	(grub_uint8_t): ... this.
+	(uint16_t): Renamed to ...
+	(grub_uint16_t): ... this.
+	(uint32_t): Renamed to ...
+	(grub_uint32_t): ... this.
+	(uint64_t): Renamed to ...
+	(grub_uint64_t): ... this.
+	(u_char): Renamed to ...
+	(grub_u_char): ... this.
+	(u_int): Renamed to ...
+	(grub_u_int): ... this.
+	(u_int8_t): Renamed to ...
+	(grub_u_int8_t): ... this.
+	(u_int16_t): Renamed to ...
+	(grub_u_int16_t): ... this.
+	(u_int32_t): Renamed to ...
+	(grub_u_int32_t): ... this.
+	(u_int64_t): Renamed to ...
+	(grub_u_int64_t): ... this.
+	(ino_t): Renamed to ...
+	(grub_ino_t): ... this.
+	All callers are changed.
+
+2004-06-14  Jeroen Dekkers  <jeroen@dekkers.cx>
+
+	* stage2/ufs2.h (__uint8_t): Remove.
+	(__uint16_t): Likewise.
+	(__uint32_t): Likewise.
+	(__uint64_t): Likewise.
+	(ino_t): Typedef to uint32_t.
+
+2004-06-13  Yoshinori K. Okuji  <okuji@enbug.org>
+
+	* stage2/Makefile.am (noinst_HEADERS): Added ufs2.h.
+	
 2004-06-13  Yoshinori K. Okuji  <okuji@enbug.org>
 
 	* configure.ac (AC_INIT): Upgraded to 0.95.

@@ -1,7 +1,7 @@
 /* device.c - Some helper functions for OS devices and BIOS drives */
 /*
  *  GRUB  --  GRand Unified Bootloader
- *  Copyright (C) 1999,2000,2001,2002,2003,2004  Free Software Foundation, Inc.
+ *  Copyright (C) 1999,2000,2001,2002,2003,2004,2005  Free Software Foundation, Inc.
  *
  *  This program is free software; you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -248,8 +248,8 @@ partially. This is not fatal."
       }
 
     /* Set the total sectors properly, if we can. */
-    if (! fstat (fd, &st) && st.st_blocks)
-      geom->total_sectors = st.st_blocks;
+    if (! fstat (fd, &st) && st.st_size)
+      geom->total_sectors = st.st_size >> SECTOR_BITS;
     else
       geom->total_sectors = geom->cylinders * geom->heads * geom->sectors;
   }
@@ -493,12 +493,15 @@ check_device (const char *device)
 static int
 read_device_map (FILE *fp, char **map, const char *map_file)
 {
-  static void show_error (int no, const char *msg)
+  auto void show_error (int no, const char *msg);
+  auto void show_warning (int no, const char *msg, ...);
+  
+  auto void show_error (int no, const char *msg)
     {
       fprintf (stderr, "%s:%d: error: %s\n", map_file, no, msg);
     }
   
-  static void show_warning (int no, const char *msg, ...)
+  auto void show_warning (int no, const char *msg, ...)
     {
       va_list ap;
       

@@ -1,5 +1,5 @@
-This is multiboot.info, produced by makeinfo version 4.6 from
-/home/yo/work/grub/docs/multiboot.texi.
+This is ../../docs/multiboot.info, produced by makeinfo version 4.7
+from ../../docs/multiboot.texi.
 
 INFO-DIR-SECTION Kernel
 START-INFO-DIR-ENTRY
@@ -44,8 +44,8 @@ sequence standard. This edition documents version 0.6.93.
 
 File: multiboot.info,  Node: Overview,  Next: Terminology,  Prev: Top,  Up: Top
 
-Introduction to Multiboot Specification
-***************************************
+1 Introduction to Multiboot Specification
+*****************************************
 
 This chapter describes some rough information on the Multiboot
 Specification. Note that this is not a part of the specification itself.
@@ -63,8 +63,8 @@ Specification. Note that this is not a part of the specification itself.
 
 File: multiboot.info,  Node: Motivation,  Next: Architecture,  Up: Overview
 
-The background of Multiboot Specification
-=========================================
+1.1 The background of Multiboot Specification
+=============================================
 
 Every operating system ever created tends to have its own boot loader.
 Installing a new operating system on a machine generally involves
@@ -89,8 +89,8 @@ how they must interface with the operating system being loaded.
 
 File: multiboot.info,  Node: Architecture,  Next: Operating systems,  Prev: Motivation,  Up: Overview
 
-The target architecture
-=======================
+1.2 The target architecture
+===========================
 
 This specification is primarily targeted at PC, since they are the most
 common and have the largest variety of operating systems and boot
@@ -102,8 +102,8 @@ adopted for them as well.
 
 File: multiboot.info,  Node: Operating systems,  Next: Boot sources,  Prev: Architecture,  Up: Overview
 
-The target operating systems
-============================
+1.3 The target operating systems
+================================
 
 This specification is targeted toward free 32-bit operating systems
 that can be fairly easily modified to support the specification without
@@ -118,8 +118,8 @@ specification as well, but that's probably a pipe dream.
 
 File: multiboot.info,  Node: Boot sources,  Next: Boot-time configuration,  Prev: Operating systems,  Up: Overview
 
-Boot sources
-============
+1.4 Boot sources
+================
 
 It should be possible to write compliant boot loaders that load the OS
 image from a variety of sources, including floppy disk, hard disk, and
@@ -141,8 +141,8 @@ user-friendliness.
 
 File: multiboot.info,  Node: Boot-time configuration,  Next: Convenience to operating systems,  Prev: Boot sources,  Up: Overview
 
-Configure an operating system at boot-time
-==========================================
+1.5 Configure an operating system at boot-time
+==============================================
 
 It is often necessary for one reason or another for the user to be able
 to provide some configuration information to an operating system
@@ -154,8 +154,8 @@ information to the operating system.
 
 File: multiboot.info,  Node: Convenience to operating systems,  Next: Boot modules,  Prev: Boot-time configuration,  Up: Overview
 
-How to make OS development easier
-=================================
+1.6 How to make OS development easier
+=====================================
 
 OS images should be easy to generate. Ideally, an OS image should simply
 be an ordinary 32-bit executable file in whatever file format the
@@ -193,8 +193,8 @@ the local a.out format variant in addition to being Multiboot-compliant.
 
 File: multiboot.info,  Node: Boot modules,  Prev: Convenience to operating systems,  Up: Overview
 
-Boot modules
-============
+1.7 Boot modules
+================
 
 Many modern operating system kernels, such as those of VSTa and Mach, do
 not by themselves contain enough mechanism to get the system fully
@@ -216,8 +216,8 @@ because some operating systems will be unable to boot without them.
 
 File: multiboot.info,  Node: Terminology,  Next: Specification,  Prev: Overview,  Up: Top
 
-The definitions of terms used through the specification
-*******************************************************
+2 The definitions of terms used through the specification
+*********************************************************
 
 "must"
      We use the term "must", when any boot loader or OS image needs to
@@ -277,8 +277,8 @@ The definitions of terms used through the specification
 
 File: multiboot.info,  Node: Specification,  Next: Examples,  Prev: Terminology,  Up: Top
 
-The exact definitions of Multiboot Specification
-************************************************
+3 The exact definitions of Multiboot Specification
+**************************************************
 
 There are three main aspects of a boot loader/OS image interface:
 
@@ -299,8 +299,8 @@ There are three main aspects of a boot loader/OS image interface:
 
 File: multiboot.info,  Node: OS image format,  Next: Machine state,  Up: Specification
 
-OS image format
-===============
+3.1 OS image format
+===================
 
 An OS image may be an ordinary 32-bit executable file in the standard
 format for that particular operating system, except that it may be
@@ -325,8 +325,8 @@ the beginning of the text segment after the _real_ executable header.
 
 File: multiboot.info,  Node: Header layout,  Next: Header magic fields,  Up: OS image format
 
-The layout of Multiboot header
-------------------------------
+3.1.1 The layout of Multiboot header
+------------------------------------
 
 The layout of the Multiboot header must be as follows:
 
@@ -353,8 +353,8 @@ and `depth' are defind in *Note Header graphics fields::.
 
 File: multiboot.info,  Node: Header magic fields,  Next: Header address fields,  Prev: Header layout,  Up: OS image format
 
-The magic fields of Multiboot header
-------------------------------------
+3.1.2 The magic fields of Multiboot header
+------------------------------------------
 
 `magic'
      The field `magic' is the magic number identifying the header,
@@ -409,8 +409,8 @@ The magic fields of Multiboot header
 
 File: multiboot.info,  Node: Header address fields,  Next: Header graphics fields,  Prev: Header magic fields,  Up: OS image format
 
-The address fields of Multiboot header
---------------------------------------
+3.1.3 The address fields of Multiboot header
+--------------------------------------------
 
 All of the address fields enabled by flag bit 16 are physical addresses.
 The meaning of each is as follows:
@@ -451,8 +451,8 @@ The meaning of each is as follows:
 
 File: multiboot.info,  Node: Header graphics fields,  Prev: Header address fields,  Up: OS image format
 
-The graphics fields of Multiboot header
----------------------------------------
+3.1.4 The graphics fields of Multiboot header
+---------------------------------------------
 
 All of the graphics fields are enabled by flag bit 2. They specify the
 preferred graphics mode. Note that that is only a _recommended_ mode by
@@ -486,8 +486,8 @@ should fall back to a similar mode, if available.
 
 File: multiboot.info,  Node: Machine state,  Next: Boot information format,  Prev: OS image format,  Up: Specification
 
-Machine state
-=============
+3.2 Machine state
+=================
 
 When the boot loader invokes the 32-bit operating system, the machine
 must have the following state:
@@ -554,8 +554,8 @@ mode.
 
 File: multiboot.info,  Node: Boot information format,  Prev: Machine state,  Up: Specification
 
-Boot information format
-=======================
+3.3 Boot information format
+===========================
 
 FIXME: Split this chapter like the chapter "OS image format".
 
@@ -882,8 +882,8 @@ were VBE modes.
 
 File: multiboot.info,  Node: Examples,  Next: History,  Prev: Specification,  Up: Top
 
-Examples
-********
+4 Examples
+**********
 
 *Caution:* The following items are not part of the specification
 document, but are included for prospective operating system and boot
@@ -899,8 +899,8 @@ loader writers.
 
 File: multiboot.info,  Node: Notes on PC,  Next: BIOS device mapping techniques,  Up: Examples
 
-Notes on PC
-===========
+4.1 Notes on PC
+===============
 
 In reference to bit 0 of the `flags' parameter in the Multiboot
 information structure, if the bootloader in question uses older BIOS
@@ -931,8 +931,8 @@ as desired.
 
 File: multiboot.info,  Node: BIOS device mapping techniques,  Next: Example OS code,  Prev: Notes on PC,  Up: Examples
 
-BIOS device mapping techniques
-==============================
+4.2 BIOS device mapping techniques
+==================================
 
 Both of these techniques should be usable from any PC operating system,
 and neither require any special support in the drivers themselves. This
@@ -956,8 +956,8 @@ drivers.
 
 File: multiboot.info,  Node: Data comparison technique,  Next: I/O restriction technique,  Up: BIOS device mapping techniques
 
-Data comparison technique
--------------------------
+4.2.1 Data comparison technique
+-------------------------------
 
 Before activating _any_ of the device drivers, gather enough data from
 similar sectors on each of the disks such that each one can be uniquely
@@ -980,8 +980,8 @@ to provide such a mapping.
 
 File: multiboot.info,  Node: I/O restriction technique,  Prev: Data comparison technique,  Up: BIOS device mapping techniques
 
-I/O restriction technique
--------------------------
+4.2.2 I/O restriction technique
+-------------------------------
 
 This first step may be unnecessary, but first create copy-on-write
 mappings for the device drivers writing into PC RAM. Keep the original
@@ -1012,8 +1012,8 @@ numbered devices on the controller.
 
 File: multiboot.info,  Node: Example OS code,  Next: Example boot loader code,  Prev: BIOS device mapping techniques,  Up: Examples
 
-Example OS code
-===============
+4.3 Example OS code
+===================
 
 In this distribution, the example Multiboot kernel `kernel' is
 included. The kernel just prints out the Multiboot information structure
@@ -1047,58 +1047,58 @@ Multiboot information structure.
 
 File: multiboot.info,  Node: multiboot.h,  Next: boot.S,  Up: Example OS code
 
-multiboot.h
------------
+4.3.1 multiboot.h
+-----------------
 
 This is the source code in the file `multiboot.h':
 
      /* multiboot.h - the header for Multiboot */
      /* Copyright (C) 1999, 2001  Free Software Foundation, Inc.
-     
+
         This program is free software; you can redistribute it and/or modify
         it under the terms of the GNU General Public License as published by
         the Free Software Foundation; either version 2 of the License, or
         (at your option) any later version.
-     
+
         This program is distributed in the hope that it will be useful,
         but WITHOUT ANY WARRANTY; without even the implied warranty of
         MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
         GNU General Public License for more details.
-     
+
         You should have received a copy of the GNU General Public License
         along with this program; if not, write to the Free Software
         Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA. */
-     
+
      /* Macros. */
-     
+
      /* The magic number for the Multiboot header. */
      #define MULTIBOOT_HEADER_MAGIC          0x1BADB002
-     
+
      /* The flags for the Multiboot header. */
      #ifdef __ELF__
      # define MULTIBOOT_HEADER_FLAGS         0x00000003
      #else
      # define MULTIBOOT_HEADER_FLAGS         0x00010003
      #endif
-     
+
      /* The magic number passed by a Multiboot-compliant boot loader. */
      #define MULTIBOOT_BOOTLOADER_MAGIC      0x2BADB002
-     
+
      /* The size of our stack (16KB). */
      #define STACK_SIZE                      0x4000
-     
+
      /* C symbol format. HAVE_ASM_USCORE is defined by configure. */
      #ifdef HAVE_ASM_USCORE
      # define EXT_C(sym)                     _ ## sym
      #else
      # define EXT_C(sym)                     sym
      #endif
-     
+
      #ifndef ASM
      /* Do not include here in boot.S. */
-     
+
      /* Types. */
-     
+
      /* The Multiboot header. */
      typedef struct multiboot_header
      {
@@ -1111,7 +1111,7 @@ This is the source code in the file `multiboot.h':
        unsigned long bss_end_addr;
        unsigned long entry_addr;
      } multiboot_header_t;
-     
+
      /* The symbol table for a.out. */
      typedef struct aout_symbol_table
      {
@@ -1120,7 +1120,7 @@ This is the source code in the file `multiboot.h':
        unsigned long addr;
        unsigned long reserved;
      } aout_symbol_table_t;
-     
+
      /* The section header table for ELF. */
      typedef struct elf_section_header_table
      {
@@ -1129,7 +1129,7 @@ This is the source code in the file `multiboot.h':
        unsigned long addr;
        unsigned long shndx;
      } elf_section_header_table_t;
-     
+
      /* The Multiboot information. */
      typedef struct multiboot_info
      {
@@ -1148,7 +1148,7 @@ This is the source code in the file `multiboot.h':
        unsigned long mmap_length;
        unsigned long mmap_addr;
      } multiboot_info_t;
-     
+
      /* The module structure. */
      typedef struct module
      {
@@ -1157,7 +1157,7 @@ This is the source code in the file `multiboot.h':
        unsigned long string;
        unsigned long reserved;
      } module_t;
-     
+
      /* The memory map. Be careful that the offset 0 is base_addr_low
         but no size. */
      typedef struct memory_map
@@ -1169,47 +1169,47 @@ This is the source code in the file `multiboot.h':
        unsigned long length_high;
        unsigned long type;
      } memory_map_t;
-     
+
      #endif /* ! ASM */
 
 
 File: multiboot.info,  Node: boot.S,  Next: kernel.c,  Prev: multiboot.h,  Up: Example OS code
 
-boot.S
-------
+4.3.2 boot.S
+------------
 
 In the file `boot.S':
 
      /* boot.S - bootstrap the kernel */
      /* Copyright (C) 1999, 2001  Free Software Foundation, Inc.
-     
+
         This program is free software; you can redistribute it and/or modify
         it under the terms of the GNU General Public License as published by
         the Free Software Foundation; either version 2 of the License, or
         (at your option) any later version.
-     
+
         This program is distributed in the hope that it will be useful,
         but WITHOUT ANY WARRANTY; without even the implied warranty of
         MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
         GNU General Public License for more details.
-     
+
         You should have received a copy of the GNU General Public License
         along with this program; if not, write to the Free Software
         Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA. */
-     
+
      #define ASM     1
      #include <multiboot.h>
-     
+
              .text
-     
+
              .globl  start, _start
      start:
      _start:
              jmp     multiboot_entry
-     
+
              /* Align 32 bits boundary. */
              .align  4
-     
+
              /* Multiboot header. */
      multiboot_header:
              /* magic */
@@ -1230,68 +1230,68 @@ In the file `boot.S':
              /* entry_addr */
              .long   multiboot_entry
      #endif /* ! __ELF__ */
-     
+
      multiboot_entry:
              /* Initialize the stack pointer. */
              movl    $(stack + STACK_SIZE), %esp
-     
+
              /* Reset EFLAGS. */
              pushl   $0
              popf
-     
+
              /* Push the pointer to the Multiboot information structure. */
              pushl   %ebx
              /* Push the magic value. */
              pushl   %eax
-     
+
              /* Now enter the C main function... */
              call    EXT_C(cmain)
-     
+
              /* Halt. */
              pushl   $halt_message
              call    EXT_C(printf)
-     
+
      loop:   hlt
              jmp     loop
-     
+
      halt_message:
              .asciz  "Halted."
-     
+
              /* Our stack area. */
              .comm   stack, STACK_SIZE
 
 
 File: multiboot.info,  Node: kernel.c,  Next: Other Multiboot kernels,  Prev: boot.S,  Up: Example OS code
 
-kernel.c
---------
+4.3.3 kernel.c
+--------------
 
 And, in the file `kernel.c':
 
      /* kernel.c - the C part of the kernel */
      /* Copyright (C) 1999  Free Software Foundation, Inc.
-     
+
         This program is free software; you can redistribute it and/or modify
         it under the terms of the GNU General Public License as published by
         the Free Software Foundation; either version 2 of the License, or
         (at your option) any later version.
-     
+
         This program is distributed in the hope that it will be useful,
         but WITHOUT ANY WARRANTY; without even the implied warranty of
         MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
         GNU General Public License for more details.
-     
+
         You should have received a copy of the GNU General Public License
         along with this program; if not, write to the Free Software
         Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA. */
-     
+
      #include <multiboot.h>
-     
+
      /* Macros. */
-     
+
      /* Check if the bit BIT in FLAGS is set. */
      #define CHECK_FLAG(flags,bit)   ((flags) & (1 << (bit)))
-     
+
      /* Some screen stuff. */
      /* The number of columns. */
      #define COLUMNS                 80
@@ -1301,7 +1301,7 @@ And, in the file `kernel.c':
      #define ATTRIBUTE               7
      /* The video memory address. */
      #define VIDEO                   0xB8000
-     
+
      /* Variables. */
      /* Save the X position. */
      static int xpos;
@@ -1309,102 +1309,102 @@ And, in the file `kernel.c':
      static int ypos;
      /* Point to the video memory. */
      static volatile unsigned char *video;
-     
+
      /* Forward declarations. */
      void cmain (unsigned long magic, unsigned long addr);
      static void cls (void);
      static void itoa (char *buf, int base, int d);
      static void putchar (int c);
      void printf (const char *format, ...);
-     
+
      /* Check if MAGIC is valid and print the Multiboot information structure
         pointed by ADDR. */
      void
      cmain (unsigned long magic, unsigned long addr)
      {
        multiboot_info_t *mbi;
-     
+
        /* Clear the screen. */
        cls ();
-     
+
        /* Am I booted by a Multiboot-compliant boot loader? */
        if (magic != MULTIBOOT_BOOTLOADER_MAGIC)
          {
            printf ("Invalid magic number: 0x%x\n", (unsigned) magic);
            return;
          }
-     
+
        /* Set MBI to the address of the Multiboot information structure. */
        mbi = (multiboot_info_t *) addr;
-     
+
        /* Print out the flags. */
        printf ("flags = 0x%x\n", (unsigned) mbi->flags);
-     
+
        /* Are mem_* valid? */
        if (CHECK_FLAG (mbi->flags, 0))
          printf ("mem_lower = %uKB, mem_upper = %uKB\n",
                  (unsigned) mbi->mem_lower, (unsigned) mbi->mem_upper);
-     
+
        /* Is boot_device valid? */
        if (CHECK_FLAG (mbi->flags, 1))
          printf ("boot_device = 0x%x\n", (unsigned) mbi->boot_device);
-     
+
        /* Is the command line passed? */
        if (CHECK_FLAG (mbi->flags, 2))
          printf ("cmdline = %s\n", (char *) mbi->cmdline);
-     
+
        /* Are mods_* valid? */
        if (CHECK_FLAG (mbi->flags, 3))
          {
            module_t *mod;
            int i;
-     
+
            printf ("mods_count = %d, mods_addr = 0x%x\n",
                    (int) mbi->mods_count, (int) mbi->mods_addr);
            for (i = 0, mod = (module_t *) mbi->mods_addr;
                 i < mbi->mods_count;
-                i++, mod += sizeof (module_t))
+                i++, mod++)
              printf (" mod_start = 0x%x, mod_end = 0x%x, string = %s\n",
                      (unsigned) mod->mod_start,
                      (unsigned) mod->mod_end,
                      (char *) mod->string);
          }
-     
+
        /* Bits 4 and 5 are mutually exclusive! */
        if (CHECK_FLAG (mbi->flags, 4) && CHECK_FLAG (mbi->flags, 5))
          {
            printf ("Both bits 4 and 5 are set.\n");
            return;
          }
-     
+
        /* Is the symbol table of a.out valid? */
        if (CHECK_FLAG (mbi->flags, 4))
          {
            aout_symbol_table_t *aout_sym = &(mbi->u.aout_sym);
-     
+
            printf ("aout_symbol_table: tabsize = 0x%0x, "
                    "strsize = 0x%x, addr = 0x%x\n",
                    (unsigned) aout_sym->tabsize,
                    (unsigned) aout_sym->strsize,
                    (unsigned) aout_sym->addr);
          }
-     
+
        /* Is the section header table of ELF valid? */
        if (CHECK_FLAG (mbi->flags, 5))
          {
            elf_section_header_table_t *elf_sec = &(mbi->u.elf_sec);
-     
+
            printf ("elf_sec: num = %u, size = 0x%x,"
                    " addr = 0x%x, shndx = 0x%x\n",
                    (unsigned) elf_sec->num, (unsigned) elf_sec->size,
                    (unsigned) elf_sec->addr, (unsigned) elf_sec->shndx);
          }
-     
+
        /* Are mmap_* valid? */
        if (CHECK_FLAG (mbi->flags, 6))
          {
            memory_map_t *mmap;
-     
+
            printf ("mmap_addr = 0x%x, mmap_length = 0x%x\n",
                    (unsigned) mbi->mmap_addr, (unsigned) mbi->mmap_length);
            for (mmap = (memory_map_t *) mbi->mmap_addr;
@@ -1421,22 +1421,22 @@ And, in the file `kernel.c':
                      (unsigned) mmap->type);
          }
      }
-     
+
      /* Clear the screen and initialize VIDEO, XPOS and YPOS. */
      static void
      cls (void)
      {
        int i;
-     
+
        video = (unsigned char *) VIDEO;
-     
+
        for (i = 0; i < COLUMNS * LINES * 2; i++)
          *(video + i) = 0;
-     
+
        xpos = 0;
        ypos = 0;
      }
-     
+
      /* Convert the integer D to a string and save the string in BUF. If
         BASE is equal to 'd', interpret that D is decimal, and if BASE is
         equal to 'x', interpret that D is hexadecimal. */
@@ -1447,7 +1447,7 @@ And, in the file `kernel.c':
        char *p1, *p2;
        unsigned long ud = d;
        int divisor = 10;
-     
+
        /* If %d is specified and D is minus, put `-' in the head. */
        if (base == 'd' && d < 0)
          {
@@ -1457,19 +1457,19 @@ And, in the file `kernel.c':
          }
        else if (base == 'x')
          divisor = 16;
-     
+
        /* Divide UD by DIVISOR until UD == 0. */
        do
          {
            int remainder = ud % divisor;
-     
+
            *p++ = (remainder < 10) ? remainder + '0' : remainder + 'a' - 10;
          }
        while (ud /= divisor);
-     
+
        /* Terminate BUF. */
        *p = 0;
-     
+
        /* Reverse BUF. */
        p1 = buf;
        p2 = p - 1;
@@ -1482,7 +1482,7 @@ And, in the file `kernel.c':
            p2--;
          }
      }
-     
+
      /* Put the character C on the screen. */
      static void
      putchar (int c)
@@ -1496,15 +1496,15 @@ And, in the file `kernel.c':
              ypos = 0;
            return;
          }
-     
+
        *(video + (xpos + ypos * COLUMNS) * 2) = c & 0xFF;
        *(video + (xpos + ypos * COLUMNS) * 2 + 1) = ATTRIBUTE;
-     
+
        xpos++;
        if (xpos >= COLUMNS)
          goto newline;
      }
-     
+
      /* Format a string and print it on the screen, just like the libc
         function printf. */
      void
@@ -1513,9 +1513,9 @@ And, in the file `kernel.c':
        char **arg = (char **) &format;
        int c;
        char buf[20];
-     
+
        arg++;
-     
+
        while ((c = *format++) != 0)
          {
            if (c != '%')
@@ -1523,7 +1523,7 @@ And, in the file `kernel.c':
            else
              {
                char *p;
-     
+
                c = *format++;
                switch (c)
                  {
@@ -1534,17 +1534,17 @@ And, in the file `kernel.c':
                    p = buf;
                    goto string;
                    break;
-     
+
                  case 's':
                    p = *arg++;
                    if (! p)
                      p = "(null)";
-     
+
                  string:
                    while (*p)
                      putchar (*p++);
                    break;
-     
+
                  default:
                    putchar (*((int *) arg++));
                    break;
@@ -1556,36 +1556,36 @@ And, in the file `kernel.c':
 
 File: multiboot.info,  Node: Other Multiboot kernels,  Prev: kernel.c,  Up: Example OS code
 
-Other Multiboot kernels
------------------------
+4.3.4 Other Multiboot kernels
+-----------------------------
 
 Other useful information should be available in Multiboot kernels, such
-as GNU Mach and Fiasco <http://os.inf.tu-dresden.de/fiasco/>. And, it
+as GNU Mach and Fiasco `http://os.inf.tu-dresden.de/fiasco/'. And, it
 is worth mentioning the OSKit
-<http://www.cs.utah.edu/projects/flux/oskit/>, which provides a library
+`http://www.cs.utah.edu/projects/flux/oskit/', which provides a library
 supporting the specification.
 
 
 File: multiboot.info,  Node: Example boot loader code,  Prev: Example OS code,  Up: Examples
 
-Example boot loader code
-========================
+4.4 Example boot loader code
+============================
 
 The GNU GRUB (*note GRUB: (grub.info)Top.) project is a full
 Multiboot-compliant boot loader, supporting all required and optional
 features present in this specification. A public release has not been
 made, but the test release is available from:
 
-   <ftp://alpha.gnu.org/gnu/grub>
+   `ftp://alpha.gnu.org/gnu/grub'
 
-   See the webpage <http://www.gnu.org/software/grub/grub.html>, for
+   See the webpage `http://www.gnu.org/software/grub/grub.html', for
 more information.
 
 
 File: multiboot.info,  Node: History,  Next: Index,  Prev: Examples,  Up: Top
 
-The change log of this specification
-************************************
+5 The change log of this specification
+**************************************
 
 0.7
         * "Multiboot Standard" is renamed to "Multiboot Specification".
@@ -1622,40 +1622,41 @@ File: multiboot.info,  Node: Index,  Prev: History,  Up: Top
 Index
 *****
 
+ [index ]
 * Menu:
 
 
 Tag Table:
-Node: Top992
-Node: Overview1328
-Node: Motivation1792
-Node: Architecture3181
-Node: Operating systems3706
-Node: Boot sources4492
-Node: Boot-time configuration5454
-Node: Convenience to operating systems6054
-Node: Boot modules8277
-Node: Terminology9418
-Node: Specification11793
-Node: OS image format12352
-Node: Header layout13402
-Node: Header magic fields14558
-Node: Header address fields17407
-Node: Header graphics fields19241
-Node: Machine state20615
-Node: Boot information format22867
-Node: Examples38230
-Node: Notes on PC38599
-Node: BIOS device mapping techniques40157
-Node: Data comparison technique41059
-Node: I/O restriction technique41909
-Node: Example OS code43114
-Node: multiboot.h44648
-Node: boot.S48550
-Node: kernel.c51242
-Node: Other Multiboot kernels60206
-Node: Example boot loader code60625
-Node: History61143
-Node: Index62060
+Node: Top990
+Node: Overview1326
+Node: Motivation1794
+Node: Architecture3191
+Node: Operating systems3724
+Node: Boot sources4518
+Node: Boot-time configuration5488
+Node: Convenience to operating systems6096
+Node: Boot modules8327
+Node: Terminology9476
+Node: Specification11855
+Node: OS image format12418
+Node: Header layout13476
+Node: Header magic fields14644
+Node: Header address fields17505
+Node: Header graphics fields19351
+Node: Machine state20737
+Node: Boot information format22997
+Node: Examples38368
+Node: Notes on PC38741
+Node: BIOS device mapping techniques40307
+Node: Data comparison technique41217
+Node: I/O restriction technique42079
+Node: Example OS code43296
+Node: multiboot.h44838
+Node: boot.S48662
+Node: kernel.c51286
+Node: Other Multiboot kernels60013
+Node: Example boot loader code60444
+Node: History60970
+Node: Index61891
 
 End Tag Table
