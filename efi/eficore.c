@@ -50,6 +50,19 @@ grub_efi_locate_handle_buffer (grub_efi_locate_search_type_t search_type,
 		search_type, protocol, search_key, no_handles, buffer);
 }
 
+/* temporary, until we're using gnu-efi's include files --pjones */
+extern int setjmp(grub_jmp_buf env);
+int grub_setjmp(grub_jmp_buf env)
+{
+	return setjmp(env);
+}
+
+extern void longjmp(grub_jmp_buf env, int val);
+void grub_longjmp(grub_jmp_buf env, int val)
+{
+	longjmp(env, val);
+}
+
 void *
 grub_efi_locate_protocol (grub_efi_guid_t *protocol, void *registration)
 {
