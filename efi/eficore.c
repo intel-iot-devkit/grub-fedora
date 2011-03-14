@@ -26,7 +26,11 @@
 #include <grub/efi/console_control.h>
 #include <grub/efi/time.h>
 
+#ifdef __x86_64__
 #include </usr/include/efi/x86_64/efibind.h>
+#else
+#include </usr/include/efi/ia32/efibind.h>
+#endif
 
 #include <shared.h>
 
