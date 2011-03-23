@@ -76,6 +76,7 @@ make_devices (void)
       struct grub_efidisk_data *d;
       grub_efi_block_io_t *bio;
       grub_efi_disk_io_t *dio;
+      grub_efi_status_t rc;
 
       dp = grub_efi_get_device_path (*handle);
       if (! dp)
@@ -94,7 +95,9 @@ make_devices (void)
 				    GRUB_EFI_OPEN_PROTOCOL_GET_PROTOCOL);
       if (!dio)
 	{
-	  grub_efi_close_protocol(*handle, &block_io_guid);
+          printf("%s %d closing block_io_guid\n", __FILE__, __LINE__);
+	  rc = grub_efi_close_protocol(*handle, &block_io_guid);
+	  printf("got 0x%x closing block_io_guid\n", rc);
 	  continue;
 	}
 
@@ -102,8 +105,12 @@ make_devices (void)
       if (! d)
 	{
 	  /* Uggh.  */
-	  grub_efi_close_protocol(*handle, &block_io_guid);
-	  grub_efi_close_protocol(*handle, &disk_io_guid);
+          printf("%s %d closing block_io_guid\n", __FILE__, __LINE__);
+	  rc = grub_efi_close_protocol(*handle, &block_io_guid);
+	  printf("got 0x%x closing block_io_guid\n", rc);
+          printf("%s %d closing disk_io_guid\n", __FILE__, __LINE__);
+	  rc = grub_efi_close_protocol(*handle, &disk_io_guid);
+	  printf("got 0x%x closing disk_io_guid\n", rc);
 	  grub_free (handles);
 	  return 0;
 	}
@@ -227,12 +234,17 @@ static void
 free_devices (struct grub_efidisk_data *devices)
 {
   struct grub_efidisk_data *p, *q;
+  grub_efi_status_t rc;
 
   for (p = devices; p; p = q)
     {
       q = p->next;
-      grub_efi_close_protocol(p->handle, &block_io_guid);
-      grub_efi_close_protocol(p->handle, &disk_io_guid);
+      printf("%s %d closing block_io_guid\n", __FILE__, __LINE__);
+      rc = grub_efi_close_protocol(p->handle, &block_io_guid);
+      printf("got 0x%x closing block_io_guid\n", rc);
+      printf("%s %d closing disk_io_guid\n", __FILE__, __LINE__);
+      rc = grub_efi_close_protocol(p->handle, &disk_io_guid);
+      printf("got 0x%x closing disk_io_guid\n", rc);
       grub_free (p);
     }
 }
