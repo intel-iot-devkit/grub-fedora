@@ -41,8 +41,8 @@ grub_efi_handle_t *grub_efi_locate_handle (grub_efi_locate_search_type_t
 void *grub_efi_open_protocol (grub_efi_handle_t handle,
 			      grub_efi_guid_t * protocol,
 			      grub_efi_uint32_t attributes);
-efi_status_t grub_efi_close_protocol (grub_efi_handle_t handle,
-				      grub_efi_guid_t * protocol);
+grub_efi_status_t grub_efi_close_protocol (grub_efi_handle_t handle,
+					   grub_efi_guid_t * protocol);
 int grub_efi_set_text_mode (int on);
 void grub_efi_stall (grub_efi_uintn_t microseconds);
 void *grub_efi_allocate_pool (grub_efi_uintn_t size);

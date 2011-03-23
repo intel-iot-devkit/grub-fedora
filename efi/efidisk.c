@@ -83,21 +83,35 @@ make_devices (void)
 
       ldp = find_last_device_path (dp);
       if (! ldp)
-	/* This is empty. Why?  */
-	continue;
+        {
+	  grub_efi_close_protocol(*handle, &device_path_guid);
+	  continue;
+	}
 
       bio = grub_efi_open_protocol (*handle, &block_io_guid,
 				    GRUB_EFI_OPEN_PROTOCOL_GET_PROTOCOL);
+      if (!bio)
+        {
+	  grub_efi_close_protocol(*handle, &device_path_guid);
+	  continue;
+	}
+	  
       dio = grub_efi_open_protocol (*handle, &disk_io_guid,
 				    GRUB_EFI_OPEN_PROTOCOL_GET_PROTOCOL);
-      if (! bio || ! dio)
-	/* This should not happen... Why?  */
-	continue;
+      if (!dio)
+	{
+	  grub_efi_close_protocol(*handle, &block_io_guid);
+	  grub_efi_close_protocol(*handle, &device_path_guid);
+	  continue;
+	}
 
       d = grub_malloc (sizeof (*d));
       if (! d)
 	{
 	  /* Uggh.  */
+	  grub_efi_close_protocol(*handle, &block_io_guid);
+	  grub_efi_close_protocol(*handle, &disk_io_guid);
+	  grub_efi_close_protocol(*handle, &device_path_guid);
 	  grub_free (handles);
 	  return 0;
 	}
@@ -225,6 +239,9 @@ free_devices (struct grub_efidisk_data *devices)
   for (p = devices; p; p = q)
     {
       q = p->next;
+      grub_efi_close_protocol(p->handle, &block_io_guid);
+      grub_efi_close_protocol(p->handle, &disk_io_guid);
+      grub_efi_close_protocol(p->handle, &device_path_guid);
       grub_free (p);
     }
 }
@@ -552,6 +569,7 @@ grub_get_drive_partition_from_bdev_handle (grub_efi_handle_t handle,
 	{
 	  *partition = 0xFFFFFF;
 	  *drive = drv;
+          grub_efi_close_protocol(handle, &device_path_guid);
 	  return 1;
 	}
     }
@@ -561,6 +579,7 @@ grub_get_drive_partition_from_bdev_handle (grub_efi_handle_t handle,
     {
       *partition = 0xFFFFFF;
       *drive = drv;
+      grub_efi_close_protocol(handle, &device_path_guid);
       return 1;
     }
 
@@ -571,6 +590,7 @@ grub_get_drive_partition_from_bdev_handle (grub_efi_handle_t handle,
 	{
 	  *partition = 0xFFFFFF;
 	  *drive = drv;
+          grub_efi_close_protocol(handle, &device_path_guid);
 	  return 1;
 	}
     }
@@ -586,6 +606,7 @@ grub_get_drive_partition_from_bdev_handle (grub_efi_handle_t handle,
 	break;
     }
 
+  grub_efi_close_protocol(handle, &device_path_guid);
   free_devices (devices);
 
   if (! found)
@@ -711,6 +732,7 @@ get_parent_of_disk(grub_efi_device_path_t *hd)
         {
 	  grub_efi_device_path_t *p;
 	  ret = duplicate_device_path((grub_efi_device_path_t *)fsdp);
+	  grub_efi_close_protocol(*handle, &device_path_guid);
 	  if (!ret)
 	    return NULL;
 	  for (p = ret; ; p = GRUB_EFI_NEXT_DEVICE_PATH(p))

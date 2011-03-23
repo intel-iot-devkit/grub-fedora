@@ -100,6 +100,7 @@ free_devices (struct grub_efiserial_data *devices)
   for (p = devices; p; p = q)
     {
       q = p->next;
+      grub_efi_close_protocol(p->handle, &serial_io_guid);
       grub_free (p);
     }
 }

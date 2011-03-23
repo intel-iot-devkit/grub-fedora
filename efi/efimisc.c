@@ -592,7 +592,10 @@ simple_open_file(grub_efi_handle_t dev_handle,
     return NULL;
   status = Call_Service_2 (file_system->open_volume, file_system, &root);
   if (status != GRUB_EFI_SUCCESS)
-    return NULL;
+    {
+      grub_efi_close_protocol (dev_handle, &simple_file_system_guid);
+      return NULL;
+    }
   file_name_w = grub_malloc (2 * strlen(file_name) + 2);
   if (! file_name_w)
     goto done;
@@ -610,6 +613,8 @@ simple_open_file(grub_efi_handle_t dev_handle,
   if (file_name_w)
     grub_free (file_name_w);
   Call_Service_1 (root->close, root);
+  if (!file)
+    grub_efi_close_protocol (dev_handle, &simple_file_system_guid);
   return file;
 }
 
@@ -636,6 +641,7 @@ grub_load_saved_default (grub_efi_handle_t dev_handle)
     saved_entryno = val;
  done:
   Call_Service_1 (file->close, file);
+  grub_efi_close_protocol (dev_handle, &simple_file_system_guid);
 }
 
 int
@@ -667,5 +673,7 @@ grub_save_saved_default (int new_default)
     }
  done:
   Call_Service_1 (file->close, file);
+  grub_efi_close_protocol (loaded_image->device_handle, &simple_file_system_guid);
+  grub_efi_close_protocol (grub_efi_image_handle, &loaded_image_guid);
   return ret;
 }

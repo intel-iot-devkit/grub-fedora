@@ -54,5 +54,7 @@ grub_efi_device_path_t *
 device_path_from_utf8 (const char *device);
 
 extern grub_efi_guid_t simple_file_system_guid;
+extern grub_efi_guid_t loaded_image_guid;
+extern grub_efi_guid_t device_path_guid;
 
 #endif /* ! GRUB_EFI_MISC_HEADER */

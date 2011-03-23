@@ -248,6 +248,7 @@ grub_chainloader (char *filename)
       goto fail;
     }
   loaded_image->device_handle = dev_handle;
+  grub_efi_close_protocol(image_handle, &loaded_image_guid);
 
   grub_close ();
   return KERNEL_TYPE_CHAINLOADER;

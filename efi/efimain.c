@@ -68,6 +68,7 @@ real_main (void)
 
     grub_load_saved_default (loaded_image->device_handle);
   }
+  grub_efi_close_protocol(grub_efi_image_handle, &loaded_image_guid);
 
   init_bios_info ();
   while (console_getkey() < 0)

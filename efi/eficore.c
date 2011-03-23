@@ -41,8 +41,8 @@ grub_efi_handle_t grub_efi_image_handle;
 grub_efi_system_table_t *grub_efi_system_table;
 
 static grub_efi_guid_t console_control_guid = GRUB_EFI_CONSOLE_CONTROL_GUID;
-static grub_efi_guid_t loaded_image_guid = GRUB_EFI_LOADED_IMAGE_GUID;
-static grub_efi_guid_t device_path_guid = GRUB_EFI_DEVICE_PATH_GUID;
+grub_efi_guid_t loaded_image_guid = GRUB_EFI_LOADED_IMAGE_GUID;
+grub_efi_guid_t device_path_guid = GRUB_EFI_DEVICE_PATH_GUID;
 
 /* temporary, until we're using gnu-efi's include files --pjones */
 extern int setjmp(grub_jmp_buf env);
@@ -150,10 +150,11 @@ grub_efi_open_protocol (grub_efi_handle_t handle,
   return interface;
 }
 
-efi_status_t
+grub_efi_status_t
 grub_efi_close_protocol (grub_efi_handle_t handle,
 			 grub_efi_guid_t *protocol)
 {
+  grub_efi_boot_services_t *b;
   grub_efi_status_t status;
 
   b = grub_efi_system_table->boot_services;
