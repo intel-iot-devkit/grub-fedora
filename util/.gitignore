@@ -1,7 +1,0 @@
-Makefile.in
-Makefile
-.deps
-grub-image
-grub-install
-grub-md5-crypt
-grub-terminfo
